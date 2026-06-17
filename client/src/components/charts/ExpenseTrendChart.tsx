@@ -19,60 +19,66 @@ type Props = {
 
 export default function ExpenseTrendChart({ data }: Props) {
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <LineChart data={data}>
+    <div className="h-full w-full select-none text-[rgb(var(--text))]">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={data}>
 
-        {/* GRID */}
-        <CartesianGrid
-          strokeDasharray="3 3"
-          stroke="rgb(var(--border))"
-          opacity={0.3}
-        />
+          {/* GRID */}
+          <CartesianGrid
+            stroke="rgb(var(--border))"
+            strokeDasharray="3 3"
+            opacity={0.25}
+          />
 
-        {/* X AXIS */}
-        <XAxis
-          dataKey="date"
-          tick={{ fill: "rgb(var(--muted))", fontSize: 12 }}
-          axisLine={false}
-          tickLine={false}
-        />
+          {/* X AXIS */}
+          <XAxis
+            dataKey="date"
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: "rgb(var(--muted))", fontSize: 12 }}
+          />
 
-        {/* Y AXIS */}
-        <YAxis
-          tick={{ fill: "rgb(var(--muted))", fontSize: 12 }}
-          axisLine={false}
-          tickLine={false}
-        />
+          {/* Y AXIS */}
+          <YAxis
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: "rgb(var(--muted))", fontSize: 12 }}
+          />
 
-        {/* TOOLTIP */}
-        <Tooltip
-          contentStyle={{
-            backgroundColor: "rgb(var(--surface))",
-            border: "1px solid rgb(var(--border))",
-            borderRadius: "10px",
-            color: "rgb(var(--text))",
-            fontSize: "12px",
-          }}
-          labelStyle={{
-            color: "rgb(var(--muted))",
-            marginBottom: "4px",
-          }}
-        />
+          {/* TOOLTIP */}
+          <Tooltip
+            contentStyle={{
+              backgroundColor: "rgb(var(--surface))",
+              border: "1px solid rgb(var(--border))",
+              borderRadius: "10px",
+              color: "rgb(var(--text))",
+              fontSize: "12px",
+            }}
+            labelStyle={{
+              color: "rgb(var(--muted))",
+              marginBottom: "4px",
+            }}
+            itemStyle={{
+              color: "rgb(var(--text))",
+            }}
+          />
 
-        {/* LINE */}
-        <Line
-          type="monotone"
-          dataKey="expense"
-          stroke="rgb(var(--primary))"
-          strokeWidth={2}
-          dot={false}
-          activeDot={{
-            r: 5,
-            stroke: "rgb(var(--primary))",
-            strokeWidth: 2,
-          }}
-        />
-      </LineChart>
-    </ResponsiveContainer>
+          {/* LINE */}
+          <Line
+            type="monotone"
+            dataKey="expense"
+            stroke="rgb(var(--primary))"
+            strokeWidth={2}
+            dot={false}
+            activeDot={{
+              r: 5,
+              stroke: "rgb(var(--primary))",
+              strokeWidth: 2,
+            }}
+          />
+
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
   );
 }

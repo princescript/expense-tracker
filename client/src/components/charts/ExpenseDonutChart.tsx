@@ -4,6 +4,7 @@ import {
   Cell,
   ResponsiveContainer,
   Tooltip,
+  Label,
 } from "recharts";
 
 type DataItem = {
@@ -14,71 +15,125 @@ type DataItem = {
 
 type Props = {
   data: DataItem[];
-  total?: number;
+  totalBalance?: number;
 };
 
-export default function ExpenseDonutChart({ data, total }: Props) {
-  const totalValue =
-    total ?? data.reduce((sum, item) => sum + item.value, 0);
+export default function ExpenseDonutChart({
+  data,
+  totalBalance = 0,
+}: Props) {
+  const totalExpense = data.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <div className="w-full h-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
+    <div className="w-full flex flex-col  text-[rgb(var(--text))] select-none">
 
-          {/* DONUT */}
-          <Pie
-            data={data}
-            dataKey="value"
-            innerRadius={75}
-            outerRadius={110}
-            paddingAngle={4}
-            stroke="none"
+      {/* HEADER */}
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs text-[rgb(var(--muted))]">Total Balance</p>
+          <p
+            className={`text-lg font-semibold ${
+              totalBalance < 0
+                ? "text-[rgb(var(--danger))]"
+                : "text-[rgb(var(--text))]"
+            }`}
           >
-            {data.map((entry, i) => (
-              <Cell key={i} fill={entry.color} />
-            ))}
-          </Pie>
+            ₹{totalBalance.toLocaleString("en-IN")}
+          </p>
+        </div>
 
-          {/* CENTER TEXT */}
-          <text
-            x="50%"
-            y="45%"
-            textAnchor="middle"
-            dominantBaseline="middle"
-            className="fill-[rgb(var(--text))] text-lg font-semibold"
-          >
-            ₹{totalValue.toLocaleString("en-IN")}
-          </text>
+        <div className="text-right">
+          <p className="text-xs text-[rgb(var(--muted))]">This Month</p>
+          <p className="text-lg font-semibold">
+            ₹{totalExpense.toLocaleString("en-IN")}
+          </p>
+        </div>
+      </div>
 
-          <text
-            x="50%"
-            y="55%"
-            textAnchor="middle"
-            className="fill-[rgb(var(--muted))] text-xs"
-          >
-            Total Spend
-          </text>
+      {/* BODY */}
+      <div className="flex flex-col md:flex-row items-center gap-6">
 
-          {/* THEME AWARE TOOLTIP */}
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "rgb(var(--surface))",
-              border: "1px solid rgb(var(--border))",
-              borderRadius: "12px",
-              color: "rgb(var(--text))",
-              fontSize: "12px",
-            }}
-            itemStyle={{
-              color: "rgb(var(--text))",
-            }}
-            labelStyle={{
-              color: "rgb(var(--muted))",
-              marginBottom: "4px",
-            }}
-          />
-        </PieChart>
-      </ResponsiveContainer>
+        {/* DONUT */}
+        <div className="relative w-full md:w-1/2 h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={data}
+                dataKey="value"
+                innerRadius={70}
+                outerRadius={105}
+                paddingAngle={3}
+                stroke="none"
+              >
+                {data.map((entry) => (
+                  <Cell key={entry.name} fill={entry.color} />
+                ))}
+
+                <Label
+                  position="center"
+                  content={() => (
+                    <g>
+                      <text
+                        x="50%"
+                        y="45%"
+                        textAnchor="middle"
+                        fill="currentColor"
+                        className="text-lg font-semibold"
+                      >
+                        ₹{totalExpense.toLocaleString("en-IN")}
+                      </text>
+
+                      <text
+                        x="50%"
+                        y="58%"
+                        textAnchor="middle"
+                        fill="rgb(var(--muted))"
+                        className="text-xs"
+                      >
+                        Total Spend
+                      </text>
+                    </g>
+                  )}
+                />
+              </Pie>
+
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "rgb(var(--surface))",
+                  border: "1px solid rgb(var(--border))",
+                  borderRadius: "10px",
+                  fontSize: "12px",
+                }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* LEGEND */}
+        <div className="w-full md:w-1/2 space-y-3">
+          {data.map((item) => (
+            <div
+              key={item.name}
+              className="flex items-center justify-between"
+            >
+              <div className="flex items-center gap-2">
+                <span
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ backgroundColor: item.color }}
+                />
+                <span className="text-sm text-[rgb(var(--muted))]">
+                  {item.name}
+                </span>
+              </div>
+
+              <span className="text-sm font-medium">
+                ₹{item.value.toLocaleString("en-IN")}
+              </span>
+            </div>
+          ))}
+        </div>
+
+      </div>
     </div>
   );
 }

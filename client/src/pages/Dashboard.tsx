@@ -74,7 +74,7 @@ const Dashboard = () => {
             icon={<Wallet size={18} />}
           />
         </div>
-        <div className="flex gap-4 w-full">
+        <div className="flex flex-col gap-4 w-full md:flex-row">
           <div className="flex-1">
             <ChartContainer title="Expense Breakdown">
               <ExpenseDonutChart data={donutData} />
@@ -87,7 +87,7 @@ const Dashboard = () => {
             </ChartContainer>
           </div>
         </div>
-        <RecentTransactions/>
+        <RecentTransactions />
       </div>
     </div>
   );
