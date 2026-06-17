@@ -1,46 +1,111 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300..800&display=swap');
 @import "tailwindcss";
 
+/* -------------------------
+   FONT SYSTEM
+------------------------- */
 @theme {
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+
+  /* convert to Tailwind v4 compatible tokens */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+
+  --color-primary: var(--primary);
+
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
 }
 
+/* -------------------------
+   BASE STYLES
+------------------------- */
 html {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
+
+/* -------------------------
+   DESIGN TOKENS (LIGHT)
+------------------------- */
 :root {
-  --bg: 248 250 252;
-  --surface: 255 255 255;
-  --card: 241 245 249;
+  --bg: 241 245 249;
+  --surface: 248 250 252;
+  --card: 226 232 240;
+
   --text: 15 23 42;
-  --muted: 100 116 139;
-  --border: 226 232 240;
+  --muted: 71 85 105;
+  --border: 203 213 225;
+
   --primary: 16 185 129;
+
+  --success: 34 197 94;
+  --danger: 239 68 68;
+  --warning: 245 158 11;
+  --info: 59 130 246;
 }
 
+/* -------------------------
+   DARK MODE TOKENS
+------------------------- */
 .dark {
   --bg: 2 6 23;
   --surface: 15 23 42;
   --card: 30 41 59;
+
   --text: 248 250 252;
   --muted: 148 163 184;
   --border: 30 41 59;
-  --primary: 16 185 129;
-}
-body {
-  background-color: rgb(var(--bg));
-  color: rgb(var(--text));
-  @apply leading-relaxed tracking-tight;
 
-  /* subtle improvement */
+  --primary: 16 185 129;
+
+  --success: 34 197 94;
+  --danger: 239 68 68;
+  --warning: 245 158 11;
+  --info: 59 130 246;
+}
+
+/* -------------------------
+   BASE LAYER
+------------------------- */
+body {
+  @apply bg-bg text-text leading-relaxed tracking-tight;
   letter-spacing: -0.01em;
 }
 
+/* -------------------------
+   OPTIONAL UTILITIES
+------------------------- */
+@layer utilities {
+  .bg-bg { background-color: rgb(var(--bg)); }
+  .bg-surface { background-color: rgb(var(--surface)); }
+  .bg-card { background-color: rgb(var(--card)); }
+
+  .text-muted { color: rgb(var(--muted)); }
+  .text-primary { color: rgb(var(--primary)); }
+
+  .text-success { color: rgb(var(--success)); }
+  .text-danger { color: rgb(var(--danger)); }
+  .text-warning { color: rgb(var(--warning)); }
+  .text-info { color: rgb(var(--info)); }
+
+  .border-theme { border-color: rgb(var(--border)); }
+}
+
+/* -------------------------
+   SCROLLBAR
+------------------------- */
 .sidebar-scroll::-webkit-scrollbar {
-  width: 3px;
+  width: 4px;
 }
 
 .sidebar-scroll::-webkit-scrollbar-track {
@@ -48,10 +113,10 @@ body {
 }
 
 .sidebar-scroll::-webkit-scrollbar-thumb {
-  background: rgba(16, 185, 129, 0.35);
+  background: rgb(var(--primary) / 0.35);
   border-radius: 999px;
 }
 
 .sidebar-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(16, 185, 129, 0.6);
+  background: rgb(var(--primary) / 0.6);
 }
