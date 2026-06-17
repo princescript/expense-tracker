@@ -1,9 +1,17 @@
 import { Plus, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { useGreetingDate } from "../hooks/useGreetingDate";
 import StatCard from "../components/ui/StatCard";
-import ExpenseDonutChart from "../components/charts/ExpenseDonutChart";
-import ChartContainer from "../components/charts/ChartContainer";
-import ExpenseTrendChart from "../components/charts/ExpenseTrendChart";
+
+import { lazy, Suspense } from "react";
+const ExpenseDonutChart = lazy(() =>
+  import("../components/charts/ExpenseDonutChart")
+);
+const ExpenseTrendChart = lazy(() =>
+  import("../components/charts/ExpenseTrendChart")
+);
+const ChartContainer = lazy(() =>
+  import("../components/charts/ChartContainer")
+);
 import RecentTransactions from "../components/Recenttransactions";
 
 const donutData = [
@@ -55,7 +63,6 @@ const Dashboard = () => {
             variant="green"
             icon={<TrendingUp size={18} />}
           />
-
           <StatCard
             title="Expenses"
             value="₹9,38,913"
@@ -64,7 +71,6 @@ const Dashboard = () => {
             variant="red"
             icon={<TrendingDown size={18} />}
           />
-
           <StatCard
             title="Savings"
             value="₹-88,913"
@@ -77,13 +83,17 @@ const Dashboard = () => {
         <div className="flex flex-col gap-4 w-full md:flex-row">
           <div className="flex-1">
             <ChartContainer title="Expense Breakdown">
-              <ExpenseDonutChart data={donutData} />
+              <Suspense fallback={<div>Loading...</div>}>
+                <ExpenseDonutChart data={donutData} />
+              </Suspense>
             </ChartContainer>
           </div>
 
           <div className="flex-1">
             <ChartContainer title="Expense Trend">
-              <ExpenseTrendChart data={trendData} />
+              <Suspense fallback={<div>Loading...</div>}>
+                <ExpenseTrendChart data={trendData} />
+              </Suspense>
             </ChartContainer>
           </div>
         </div>
