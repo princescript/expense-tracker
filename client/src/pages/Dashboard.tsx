@@ -1,5 +1,25 @@
-import { Plus } from "lucide-react";
+import { Plus, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { useGreetingDate } from "../hooks/useGreetingDate";
+import StatCard from "../components/ui/StatCard";
+import ExpenseDonutChart from "../components/charts/ExpenseDonutChart";
+import ChartContainer from "../components/charts/ChartContainer";
+import ExpenseTrendChart from "../components/charts/ExpenseTrendChart";
+import RecentTransactions from "../components/Recenttransactions";
+
+const donutData = [
+  { name: "Food", value: 9000, color: "#6366F1" },
+  { name: "Education", value: 7500, color: "#22C55E" },
+  { name: "Others", value: 6000, color: "#F59E0B" },
+  { name: "Transport", value: 200, color: "#EF4444" },
+];
+
+const trendData = [
+  { date: "Mon", expense: 1200 },
+  { date: "Tue", expense: 1800 },
+  { date: "Wed", expense: 900 },
+  { date: "Thu", expense: 2400 },
+  { date: "Fri", expense: 1600 },
+];
 
 const Dashboard = () => {
   const { greeting, date } = useGreetingDate();
@@ -25,39 +45,49 @@ const Dashboard = () => {
             ADD Expense
           </button>
         </header>
-        {/* PAGE TITLE */}
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight">
-            Dashboard
-          </h1>
-          <p className="text-sm text-[rgb(var(--muted))]">
-            Overview of your financial activity
-          </p>
-        </div>
         {/* CARDS */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <StatCard
+            title="Income"
+            value="₹8,50,000"
+            change="+12.5%"
+            trend="up"
+            variant="green"
+            icon={<TrendingUp size={18} />}
+          />
 
-          <div className="rounded-xl border border-[rgb(var(--border))] bg-[rgb(var(--surface))] p-4">
-            <p className="text-sm text-[rgb(var(--muted))]">Total Balance</p>
-            <h2 className="text-2xl font-semibold mt-2">₹0.00</h2>
-          </div>
+          <StatCard
+            title="Expenses"
+            value="₹9,38,913"
+            change="+6.3%"
+            trend="down"
+            variant="red"
+            icon={<TrendingDown size={18} />}
+          />
 
-          <div className="rounded-xl border border-[rgb(var(--border))] bg-[rgb(var(--surface))] p-4">
-            <p className="text-sm text-[rgb(var(--muted))]">Income</p>
-            <h2 className="text-2xl font-semibold mt-2 text-[rgb(var(--primary))]">
-              ₹0.00
-            </h2>
-          </div>
-
-          <div className="rounded-xl border border-[rgb(var(--border))] bg-[rgb(var(--surface))] p-4">
-            <p className="text-sm text-[rgb(var(--muted))]">Expenses</p>
-            <h2 className="text-2xl font-semibold mt-2 text-red-400">
-              ₹0.00
-            </h2>
-          </div>
-
+          <StatCard
+            title="Savings"
+            value="₹-88,913"
+            change="+16.4%"
+            trend="up"
+            variant="purple"
+            icon={<Wallet size={18} />}
+          />
         </div>
+        <div className="flex gap-4 w-full">
+          <div className="flex-1">
+            <ChartContainer title="Expense Breakdown">
+              <ExpenseDonutChart data={donutData} />
+            </ChartContainer>
+          </div>
 
+          <div className="flex-1">
+            <ChartContainer title="Expense Trend">
+              <ExpenseTrendChart data={trendData} />
+            </ChartContainer>
+          </div>
+        </div>
+        <RecentTransactions/>
       </div>
     </div>
   );
