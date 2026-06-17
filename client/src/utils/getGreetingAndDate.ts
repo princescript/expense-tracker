@@ -1,8 +1,11 @@
-export function getGreetingAndDate() {
-    const now = new Date();
-    const hour = now.getHours();
+export function getGreetingAndDate(): {
+    greeting: string;
+    date: string;
+} {
+    const now: Date = new Date();
+    const hour: number = now.getHours();
 
-    let greeting = "Hello";
+    let greeting: string;
 
     if (hour >= 5 && hour < 12) {
         greeting = "Good Morning ☀️";
@@ -14,7 +17,7 @@ export function getGreetingAndDate() {
         greeting = "Good Night 🌌";
     }
 
-    const date = new Intl.DateTimeFormat("en-US", {
+    const date: string = new Intl.DateTimeFormat("en-US", {
         weekday: "long",
         day: "2-digit",
         month: "long",

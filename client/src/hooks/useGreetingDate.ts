@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
 import { getGreetingAndDate } from "../utils/getGreetingAndDate";
 
-export function useGreetingDate() {
-    const [data, setData] = useState(() => getGreetingAndDate());
+type GreetingDate = ReturnType<typeof getGreetingAndDate>;
+
+export function useGreetingDate(): GreetingDate {
+    const [data, setData] = useState<GreetingDate>(() =>
+        getGreetingAndDate()
+    );
 
     useEffect(() => {
-        const interval = setInterval(() => {
+        const interval: ReturnType<typeof setInterval> = setInterval(() => {
             setData(getGreetingAndDate());
         }, 60000);
 
