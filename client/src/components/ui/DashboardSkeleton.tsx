@@ -1,27 +1,38 @@
 export const DashboardSkeleton = () => {
   return (
-    <div className="animate-pulse p-4 md:p-6">
-      {/* Header */}
-      <div className="flex justify-between items-start mb-6">
-        <div>
-          <div className="h-8 w-48 rounded bg-card mb-2" />
-          <div className="h-4 w-36 rounded bg-card" />
+    <div className="animate-pulse p-3 sm:p-4 md:p-6 space-y-6">
+
+      {/* Header Skeleton */}
+      <header className="flex items-center justify-between">
+        {/* Left */}
+        <div className="flex flex-col space-y-2">
+          <div className="h-4 w-40 sm:w-52 rounded bg-[rgb(var(--surface))]" />
+          <div className="h-3 w-28 sm:w-36 rounded bg-[rgb(var(--surface))]" />
         </div>
 
-        <div className="h-12 w-36 rounded-xl bg-card" />
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        {/* Right Button Skeleton */}
+        <div className="flex items-center gap-2 rounded-lg px-3 py-2 bg-[rgb(var(--surface))]">
+          <div className="h-4 w-4 rounded bg-[rgb(var(--surface))]" />
+          <div className="h-4 w-20 rounded bg-[rgb(var(--surface))]" />
+        </div>
+      </header>
+      {/* Stats (compact like StatCard) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="rounded-2xl p-5 bg-card">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-surface" />
+          <div
+            key={i}
+            className="rounded-xl bg-[rgb(var(--surface))] p-4 sm:p-5"
+          >
+            <div className="flex items-center gap-3">
 
-              <div className="flex-1">
-                <div className="h-4 w-20 rounded bg-surface mb-2" />
-                <div className="h-8 w-32 rounded bg-surface mb-2" />
-                <div className="h-3 w-16 rounded bg-surface" />
+              {/* icon placeholder */}
+              <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-[rgb(var(--card))]" />
+
+              {/* text */}
+              <div className="space-y-2 flex-1">
+                <div className="h-2.5 w-16 sm:w-20 rounded bg-[rgb(var(--card))]" />
+                <div className="h-5 sm:h-6 w-20 sm:w-24 rounded bg-[rgb(var(--card))]" />
+                <div className="h-2 w-12 sm:w-16 rounded bg-[rgb(var(--card))]" />
               </div>
             </div>
           </div>
@@ -29,27 +40,34 @@ export const DashboardSkeleton = () => {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+
         {/* Donut */}
-        <div className="rounded-2xl p-5 bg-card">
-          <div className="h-6 w-48 rounded bg-surface mb-6" />
+        <div className="rounded-xl bg-[rgb(var(--surface))] p-4 sm:p-5">
+          <div className="h-4 sm:h-5 w-28 sm:w-36 rounded bg-[rgb(var(--card))] mb-4 sm:mb-6" />
 
-          <div className="flex flex-col md:flex-row items-center gap-6">
-            <div className="w-52 h-52 rounded-full bg-surface" />
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
 
-            <div className="flex-1 space-y-4 w-full">
+            {/* donut smaller */}
+            <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-[rgb(var(--card))]" />
+
+            {/* legend */}
+            <div className="flex-1 space-y-3 w-full">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-5 rounded bg-surface" />
+                <div
+                  key={i}
+                  className="h-3 sm:h-4 rounded bg-[rgb(var(--card))]"
+                />
               ))}
             </div>
           </div>
         </div>
 
         {/* Line */}
-        <div className="rounded-2xl p-5 bg-card">
-          <div className="h-6 w-40 rounded bg-surface mb-6" />
+        <div className="rounded-xl bg-[rgb(var(--surface))] p-4 sm:p-5">
+          <div className="h-4 sm:h-5 w-24 sm:w-32 rounded bg-[rgb(var(--card))] mb-4 sm:mb-6" />
 
-          <div className="h-75 rounded-xl bg-surface" />
+          <div className="h-40 sm:h-52 md:h-64 rounded-lg bg-[rgb(var(--card))]" />
         </div>
       </div>
     </div>

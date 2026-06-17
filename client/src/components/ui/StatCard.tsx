@@ -33,32 +33,50 @@ export default function StatCard({
 
     const s = styles[variant];
 
-    return (
-        <div className="rounded-xl border border-[rgb(var(--border))] bg-[rgb(var(--surface))] p-4">
-            
-            <div className="flex items-center gap-3">
+   return (
+    <div
+        className="
+            rounded-xl
+            bg-[rgb(var(--surface))]
+            p-4
 
-                {/* ICON */}
-                <div className={`p-2.5 rounded-lg ${s.iconBg}`}>
-                    {icon}
-                </div>
+            shadow-[0_2px_10px_rgba(0,0,0,0.05),0_8px_24px_rgba(0,0,0,0.08)]
 
-                {/* TEXT */}
-                <div className="leading-tight">
-                    <p className="text-xs text-[rgb(var(--muted))]">
-                        {title}
-                    </p>
+            transition-all duration-300 ease-out
+            hover:-translate-y-1
+            hover:shadow-[0_8px_20px_rgba(0,0,0,0.08),0_16px_40px_rgba(0,0,0,0.12)]
+        "
+    >
+        <div className="flex items-center gap-3">
 
-                    <h2 className="text-xl font-semibold text-[rgb(var(--text))]">
-                        {value}
-                    </h2>
-
-                    <p className={`text-[11px] ${s.change}`}>
-                        {trend === "up" ? "↗" : "↘"} {change}
-                    </p>
-                </div>
-
+            {/* ICON */}
+            <div
+                className={`
+                    p-2.5 rounded-lg
+                    transition-all duration-300
+                    hover:scale-105
+                    ${s.iconBg}
+                `}
+            >
+                {icon}
             </div>
+
+            {/* TEXT */}
+            <div className="leading-tight">
+                <p className="text-xs text-[rgb(var(--muted))]">
+                    {title}
+                </p>
+
+                <h2 className="text-xl font-semibold text-[rgb(var(--text))]">
+                    {value}
+                </h2>
+
+                <p className={`text-[11px] ${s.change}`}>
+                    {trend === "up" ? "↗" : "↘"} {change}
+                </p>
+            </div>
+
         </div>
-    );
+    </div>
+);
 }
