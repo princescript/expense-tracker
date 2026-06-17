@@ -2,10 +2,9 @@ import { useState, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "../components/sidebar/Sidebar";
 import MobileHeader from "../components/MobileHeader";
-import DownHeader from "../components/DownHeader";
 
 const AppLayout = () => {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
     const location = useLocation();
 
     useEffect(() => {
@@ -20,7 +19,6 @@ const AppLayout = () => {
             />
             <div className="flex-1 flex flex-col min-w-0">
                 <MobileHeader onMenuClick={() => setSidebarOpen(true)} />
-                <DownHeader/>  
                 <main className="flex-1 p-6">
                     <Outlet />
                 </main>
