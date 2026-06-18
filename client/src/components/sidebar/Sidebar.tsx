@@ -3,7 +3,6 @@ import {
     Receipt,
     BarChart3,
     Target,
-    Calendar,
     Wallet,
     Settings,
     Moon,
@@ -36,11 +35,11 @@ const menuItems = [
         icon: Target,
         to: "/budget",
     },
-    {
-        label: "Calendar",
-        icon: Calendar,
-        to: "/calendar",
-    },
+    // {
+    //     label: "Calendar",
+    //     icon: Calendar,
+    //     to: "/calendar",
+    // },
     {
         label: "Wallets",
         icon: Wallet,

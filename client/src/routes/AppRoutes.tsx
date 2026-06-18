@@ -7,6 +7,8 @@ import DashboardSkeleton from "../components/ui/DashboardSkeleton";
 const Analytics = lazy(() =>import("../pages/Analytics"));
 const Dashboard = lazy(() => import("../pages/Dashboard"));
 const Transaction = lazy(() => import("../pages/Transaction"));
+const Setting = lazy(() => import("../pages/Settings"));
+
 
 const withSuspense = (Component: React.LazyExoticComponent<any>) => (
   <Suspense fallback={<div className="h-screen flex items-center justify-center text-muted">Loading...</div>}>
@@ -32,6 +34,10 @@ export const router = createBrowserRouter([
       {
         path: "/analytics",
         element: withSuspense(Analytics),
+      },
+      {
+        path: "/settings",
+        element: withSuspense(Setting),
       },
     ],
   },
