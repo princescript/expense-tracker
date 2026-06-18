@@ -1,10 +1,10 @@
 import { createBrowserRouter } from "react-router-dom";
 import { lazy, Suspense } from "react";
-
 import AppLayout from "../layouts/AppLayout";
 import NotFound from "../pages/NotFound";
 import DashboardSkeleton from "../components/ui/DashboardSkeleton";
 
+const Analytics = lazy(() =>import("../pages/Analytics"));
 const Dashboard = lazy(() => import("../pages/Dashboard"));
 const Transaction = lazy(() => import("../pages/Transaction"));
 
@@ -13,7 +13,6 @@ const withSuspense = (Component: React.LazyExoticComponent<any>) => (
     <Component />
   </Suspense>
 );
-
 export const router = createBrowserRouter([
   {
     element: <AppLayout />,
@@ -29,6 +28,10 @@ export const router = createBrowserRouter([
       {
         path: "/transactions",
         element: withSuspense(Transaction),
+      },
+      {
+        path: "/analytics",
+        element: withSuspense(Analytics),
       },
     ],
   },

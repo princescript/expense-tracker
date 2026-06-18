@@ -9,25 +9,8 @@ const ExpenseDonutChart = lazy(() =>
 const ExpenseTrendChart = lazy(() =>
   import("../components/charts/ExpenseTrendChart")
 );
-const ChartContainer = lazy(() =>
-  import("../components/charts/ChartContainer")
-);
 import RecentTransactions from "../components/Recenttransactions";
-
-const donutData = [
-  { name: "Food", value: 9000, color: "#6366F1" },
-  { name: "Education", value: 7500, color: "#22C55E" },
-  { name: "Others", value: 6000, color: "#F59E0B" },
-  { name: "Transport", value: 200, color: "#EF4444" },
-];
-
-const trendData = [
-  { date: "Mon", expense: 1200 },
-  { date: "Tue", expense: 1800 },
-  { date: "Wed", expense: 900 },
-  { date: "Thu", expense: 2400 },
-  { date: "Fri", expense: 1600 },
-];
+import { donutData, trendData } from "../mocks/analytics";
 
 const Dashboard = () => {
   const { greeting, date } = useGreetingDate();
@@ -82,19 +65,14 @@ const Dashboard = () => {
         </div>
         <div className="flex flex-col gap-4 w-full md:flex-row">
           <div className="flex-1">
-            <ChartContainer title="Expense Breakdown">
-              <Suspense fallback={<div>Loading...</div>}>
-                <ExpenseDonutChart data={donutData} />
-              </Suspense>
-            </ChartContainer>
+            <Suspense fallback={<div>Loading...</div>}>
+              <ExpenseDonutChart data={donutData} />
+            </Suspense>
           </div>
-
           <div className="flex-1">
-            <ChartContainer title="Expense Trend">
-              <Suspense fallback={<div>Loading...</div>}>
-                <ExpenseTrendChart data={trendData} />
-              </Suspense>
-            </ChartContainer>
+            <Suspense fallback={<div>Loading...</div>}>
+              <ExpenseTrendChart data={trendData} />
+            </Suspense>
           </div>
         </div>
         <RecentTransactions />
