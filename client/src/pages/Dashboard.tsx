@@ -10,7 +10,7 @@ const ExpenseTrendChart = lazy(() =>
   import("../components/charts/ExpenseTrendChart")
 );
 import RecentTransactions from "../components/Recenttransactions";
-import { donutData, trendData } from "../mocks/analytics";
+import { donutData, trendData } from "../mocks/transactions";
 
 const Dashboard = () => {
   const { greeting, date } = useGreetingDate();
@@ -63,17 +63,13 @@ const Dashboard = () => {
             icon={<Wallet size={18} />}
           />
         </div>
-        <div className="flex flex-col gap-4 w-full md:flex-row">
-          <div className="flex-1">
-            <Suspense fallback={<div>Loading...</div>}>
-              <ExpenseDonutChart data={donutData} />
-            </Suspense>
-          </div>
-          <div className="flex-1">
-            <Suspense fallback={<div>Loading...</div>}>
-              <ExpenseTrendChart data={trendData} />
-            </Suspense>
-          </div>
+        <div className="grid gap-4 xl:grid-cols-2">
+          <Suspense fallback={<div>Loading...</div>}>
+            <ExpenseDonutChart data={donutData} />
+          </Suspense>
+          <Suspense fallback={<div>Loading...</div>}>
+            <ExpenseTrendChart data={trendData} />
+          </Suspense>
         </div>
         <RecentTransactions />
       </div>

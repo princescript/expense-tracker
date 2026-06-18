@@ -4,10 +4,11 @@ import AppLayout from "../layouts/AppLayout";
 import NotFound from "../pages/NotFound";
 import DashboardSkeleton from "../components/ui/DashboardSkeleton";
 
-const Analytics = lazy(() =>import("../pages/Analytics"));
+const Analytics = lazy(() => import("../pages/Analytics"));
 const Dashboard = lazy(() => import("../pages/Dashboard"));
 const Transaction = lazy(() => import("../pages/Transaction"));
 const Setting = lazy(() => import("../pages/Settings"));
+const Calendar = lazy(() => import("../pages/Calendar"));
 
 
 const withSuspense = (Component: React.LazyExoticComponent<any>) => (
@@ -34,6 +35,10 @@ export const router = createBrowserRouter([
       {
         path: "/analytics",
         element: withSuspense(Analytics),
+      },
+      {
+        path: "/calendar",
+        element: withSuspense(Calendar),
       },
       {
         path: "/settings",

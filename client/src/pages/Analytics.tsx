@@ -10,8 +10,8 @@ import ExpenseDonutChart from "../components/charts/ExpenseDonutChart";
 import ExpenseTrendChart from "../components/charts/ExpenseTrendChart";
 import StatCard from "../components/ui/StatCard";
 
-import { donutData, trendData } from "../mocks/analytics";
 import SpendingByCategory from "../components/charts/SpendingByCategory";
+import { donutData, trendData } from "../mocks/transactions";
 
 
 const categoryData = [

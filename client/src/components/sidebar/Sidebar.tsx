@@ -9,6 +9,7 @@ import {
     Sun,
     LogOut,
     User,
+    Calendar,
 } from "lucide-react";
 import SidebarItem from "./SidebarItem";
 import clsx from "clsx";
@@ -35,11 +36,11 @@ const menuItems = [
         icon: Target,
         to: "/budget",
     },
-    // {
-    //     label: "Calendar",
-    //     icon: Calendar,
-    //     to: "/calendar",
-    // },
+    {
+        label: "Calendar",
+        icon: Calendar,
+        to: "/calendar",
+    },
     {
         label: "Wallets",
         icon: Wallet,

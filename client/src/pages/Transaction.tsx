@@ -1,5 +1,5 @@
 import { Plus, Search, Trash2 } from "lucide-react";
-import { transactions } from "../mocks/transaction-new";
+import { transactions } from "../mocks/transactions";
 
 const categories = [
   "All",
