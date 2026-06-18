@@ -30,7 +30,7 @@ const Settings = () => {
         </div>
       </div>
 
-      <div className="rounded-xl border border-[rgb(var(--border))] p-4">
+      <div>
         {activeTab === "Profile" && <ProfileSettings />}
         {activeTab === "Security" && <SecuritySettings />}
         {activeTab === "Developer" && <DeveloperSettings />}

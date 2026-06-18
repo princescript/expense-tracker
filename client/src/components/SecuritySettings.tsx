@@ -77,7 +77,7 @@ const SecuritySettings = () => {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-[rgb(var(--border))] px-5 py-3">
+        <div className="flex items-center justify-between border-b border-[rgb(var(--border))] px-5 py-3">
           <p className="text-xs text-[rgb(var(--muted))]">
             Last updated: never
           </p>

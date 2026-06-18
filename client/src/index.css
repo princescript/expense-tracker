@@ -110,6 +110,62 @@ body {
   letter-spacing: -0.01em;
 }
 
+@layer utilities {
+  /* 🧠 FIX: stable surface system (prevents flicker) */
+  .surface {
+    background-color: rgb(var(--surface));
+  }
+
+  .card {
+    background-color: rgb(var(--card));
+    border: 1px solid rgb(var(--border));
+  }
+
+  .card-hover {
+    transition: all 0.2s ease;
+  }
+
+  .card-hover:hover {
+    border-color: rgb(var(--primary) / 0.4);
+    background-color: rgb(var(--surface));
+  }
+
+  /* inputs must NEVER flicker */
+  .input {
+    background-color: transparent;
+    border: 1px solid rgb(var(--border));
+    color: rgb(var(--text));
+    transition: border 0.2s ease;
+  }
+
+  .input:focus {
+    outline: none;
+    border-color: rgb(var(--primary));
+  }
+
+  /* modal layer fix */
+  .overlay {
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(6px);
+  }
+
+  .modal {
+    background-color: rgb(var(--card));
+    border: 1px solid rgb(var(--border));
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  }
+
+  /* chips */
+  .chip {
+    background-color: rgb(var(--surface));
+    border: 1px solid rgb(var(--border));
+    transition: all 0.2s ease;
+  }
+
+  .chip:hover {
+    border-color: rgb(var(--primary) / 0.4);
+  }
+}
 /* -------------------------
    OPTIONAL UTILITIES
 ------------------------- */
