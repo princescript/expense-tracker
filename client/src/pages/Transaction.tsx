@@ -39,6 +39,7 @@ const Transaction = () => {
         {/* FILTERS */}
         <div className="mb-5 rounded-xl border border-[rgb(var(--border))] bg-[rgb(var(--surface))] p-3">
 
+          {/* TOP ROW */}
           <div className="flex flex-col gap-3 lg:flex-row">
 
             {/* SEARCH */}
@@ -53,15 +54,14 @@ const Transaction = () => {
             </div>
 
             {/* TYPE FILTER */}
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 lg:flex-nowrap">
               {["All", "Expense", "Income"].map((item, index) => (
                 <button
                   key={item}
-                  className={`rounded-lg px-3 py-2 text-xs font-medium transition ${
-                    index === 0
-                      ? "bg-[rgb(var(--primary))] text-white"
-                      : "border border-[rgb(var(--border))] text-[rgb(var(--muted))] hover:bg-[rgb(var(--background))]"
-                  }`}
+                  className={`rounded-lg px-3 py-2 text-xs font-medium transition whitespace-nowrap ${index === 0
+                    ? "bg-[rgb(var(--primary))] text-white"
+                    : "border border-[rgb(var(--border))] text-[rgb(var(--muted))] hover:bg-[rgb(var(--background))]"
+                    }`}
                 >
                   {item}
                 </button>
@@ -72,15 +72,15 @@ const Transaction = () => {
 
           {/* CATEGORY FILTER */}
           <div className="mt-4 border-b border-[rgb(var(--border))]">
-            <div className="flex gap-5 overflow-x-auto">
+            <div className="hide-scrollbar flex gap-5 overflow-x-auto whitespace-nowrap pb-2">
+
               {categories.map((item, index) => (
                 <button
                   key={item}
-                  className={`relative pb-2.5 text-xs font-medium whitespace-nowrap ${
-                    index === 0
+                  className={`relative pb-2.5 text-xs font-medium whitespace-nowrap ${index === 0
                       ? "text-[rgb(var(--text))]"
                       : "text-[rgb(var(--muted))] hover:text-[rgb(var(--text))]"
-                  }`}
+                    }`}
                 >
                   {item}
 
@@ -89,6 +89,7 @@ const Transaction = () => {
                   )}
                 </button>
               ))}
+
             </div>
           </div>
         </div>
@@ -129,11 +130,10 @@ const Transaction = () => {
 
                           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[rgb(var(--card))]">
                             <Car
-                              className={`h-4 w-4 ${
-                                isIncome
-                                  ? "text-[rgb(var(--success))]"
-                                  : "text-[rgb(var(--danger))]"
-                              }`}
+                              className={`h-4 w-4 ${isIncome
+                                ? "text-[rgb(var(--success))]"
+                                : "text-[rgb(var(--danger))]"
+                                }`}
                             />
                           </div>
 
@@ -148,7 +148,7 @@ const Transaction = () => {
 
                       {/* CATEGORY */}
                       <td className="px-4 py-3">
-                        <span className="rounded-full bg-[rgb(var(--card))] px-2.5 py-1 text-[11px] font-medium text-[rgb(var(--muted))]">
+                        <span className=" px-2.5 py-1 text-sm font-medium text-[rgb(var(--muted))]">
                           {tx.category}
                         </span>
                       </td>
@@ -165,11 +165,10 @@ const Transaction = () => {
 
                       {/* AMOUNT (SAFE DISPLAY ONLY) */}
                       <td
-                        className={`px-4 py-3 text-right text-sm font-semibold ${
-                          isIncome
-                            ? "text-[rgb(var(--success))]"
-                            : "text-[rgb(var(--danger))]"
-                        }`}
+                        className={`px-4 py-3 text-left text-sm font-semibold ${isIncome
+                          ? "text-[rgb(var(--success))]"
+                          : "text-[rgb(var(--danger))]"
+                          }`}
                       >
                         {isIncome ? "+" : "-"}₹
                         {Number(tx.amount).toLocaleString("en-IN")}

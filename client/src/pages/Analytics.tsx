@@ -20,25 +20,6 @@ import {
 
 
 
-const getCategoryData = (transactions: any[]) => {
-  const map = new Map<string, number>();
-
-  transactions.forEach((t) => {
-    if (t.type !== "expense") return;
-
-    map.set(
-      t.category,
-      (map.get(t.category) || 0) + Math.abs(t.amount)
-    );
-  });
-
-  return Array.from(map.entries()).map(([category, amount]) => ({
-    category,
-    amount,
-    color: "#6366f1", // keep UI stable, no redesign
-  }));
-};
-
 const Analytics = () => {
   return (
     <div className="space-y-6">
@@ -84,7 +65,6 @@ const Analytics = () => {
         <StatCard
           title="Highest Expense"
           value="₹18,000"
-          change="+2.1%"
           message="Electricity Bill"
           trend="up"
           variant="purple"
@@ -117,7 +97,7 @@ const Analytics = () => {
 
       {/* CATEGORY ANALYTICS (FIXED DATA SOURCE) */}
       <Suspense fallback={<div>Loading...</div>}>
-        <SpendingByCategory data={getCategoryData(transactions)} />
+        <SpendingByCategory data={getDonutData(transactions)} />
       </Suspense>
 
     </div>

@@ -10,8 +10,8 @@ import {
 } from "recharts";
 
 type DataItem = {
-  category: string;
-  amount: number;
+  name: string;
+  value: number;
   color: string;
 };
 
@@ -19,14 +19,8 @@ type Props = {
   data: DataItem[];
 };
 
-export default function SpendingByCategory({
-  data,
-}: Props) {
-  
-
-  const sortedData = [...data].sort(
-    (a, b) => b.amount - a.amount
-  );
+export default function SpendingByCategory({ data }: Props) {
+  const sortedData = [...data].sort((a, b) => b.value - a.value);
 
   return (
     <div
@@ -52,10 +46,7 @@ export default function SpendingByCategory({
 
       {/* Chart */}
       <div className="h-85">
-        <ResponsiveContainer
-          width="100%"
-          height="100%"
-        >
+        <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={sortedData}
             layout="vertical"
@@ -84,30 +75,25 @@ export default function SpendingByCategory({
               }}
               tickFormatter={(value) => {
                 if (value >= 1000000) {
-                  return `₹${(
-                    value / 1000000
-                  ).toFixed(1)}M`;
+                  return `₹${(value / 1000000).toFixed(1)}M`;
                 }
 
                 if (value >= 100000) {
-                  return `₹${(
-                    value / 100000
-                  ).toFixed(1)}L`;
+                  return `₹${(value / 100000).toFixed(1)}L`;
                 }
 
                 if (value >= 1000) {
-                  return `₹${(
-                    value / 1000
-                  ).toFixed(0)}K`;
+                  return `₹${(value / 1000).toFixed(0)}K`;
                 }
 
                 return `₹${value}`;
               }}
             />
 
+            {/* FIXED HERE */}
             <YAxis
               type="category"
-              dataKey="category"
+              dataKey="name"
               width={100}
               axisLine={false}
               tickLine={false}
@@ -122,39 +108,30 @@ export default function SpendingByCategory({
                 fill: "rgba(255,255,255,0.03)",
               }}
               contentStyle={{
-                background:
-                  "rgb(var(--surface))",
-                border:
-                  "1px solid rgb(var(--border))",
+                background: "rgb(var(--surface))",
+                border: "1px solid rgb(var(--border))",
                 borderRadius: "14px",
-                boxShadow:
-                  "0 12px 32px rgba(0,0,0,.12)",
-                color:
-                  "rgb(var(--text))",
+                boxShadow: "0 12px 32px rgba(0,0,0,.12)",
+                color: "rgb(var(--text))",
               }}
               formatter={(value: any) => [
-                `₹${Number(value).toLocaleString(
-                  "en-IN"
-                )}`,
+                `₹${Number(value).toLocaleString("en-IN")}`,
                 "Spent",
               ]}
               labelStyle={{
-                color:
-                  "rgb(var(--muted))",
+                color: "rgb(var(--muted))",
               }}
             />
 
+            {/* FIXED HERE */}
             <Bar
-              dataKey="amount"
+              dataKey="value"
               radius={[0, 999, 999, 0]}
               barSize={18}
               animationDuration={900}
             >
               {sortedData.map((item) => (
-                <Cell
-                  key={item.category}
-                  fill={item.color}
-                />
+                <Cell key={item.name} fill={item.color} />
               ))}
             </Bar>
           </BarChart>

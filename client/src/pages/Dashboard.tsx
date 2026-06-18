@@ -22,7 +22,7 @@ import {
 /* =========================
    DATA ENGINE (ONLY FIX)
 ========================= */
-const getSummary = (transactions :Transaction[]) => {
+const getSummary = (transactions: Transaction[]) => {
   return transactions.reduce(
     (acc, t) => {
       if (t.type === "income") {
@@ -110,8 +110,11 @@ const Dashboard = () => {
           </Suspense>
         </div>
 
-        <RecentTransactions transactions={transactions} />
-
+        <RecentTransactions
+          transactions={[...transactions]
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+            .slice(0, 5)}
+        />
       </div>
     </div>
   );
