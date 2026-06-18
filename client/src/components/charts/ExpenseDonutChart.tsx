@@ -10,7 +10,7 @@ import {
 type DataItem = {
   name: string;
   value: number;
-  color: string;
+  color?: string;
 };
 
 type Props = {
@@ -23,7 +23,7 @@ export default function ExpenseDonutChart({
   totalBalance = 0,
 }: Props) {
   const totalExpense = data.reduce((sum, item) => sum + item.value, 0);
-
+  console.log("donut", data)
   return (
     <div
       className={`rounded-xl bg-[rgb(var(--surface))] p-4 shadow-sm select-none `}

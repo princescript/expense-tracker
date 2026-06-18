@@ -2,7 +2,7 @@ type StatCardProps = {
     title: string;
     value: string;
     change?: string;
-    massage?: string;
+   message?: string;
     trend: "up" | "down";
     icon: React.ReactNode;
     variant?: "green" | "red" | "purple";
@@ -12,7 +12,7 @@ export default function StatCard({
     title,
     value,
     change,
-    massage,
+    message,
     trend,
     icon,
     variant = "green",
@@ -33,7 +33,7 @@ export default function StatCard({
         },
     };
     const s = styles[variant];
-    console.log(massage)
+   
     return (
         <div className="rounded-xl border border-[rgb(var(--border))] bg-[rgb(var(--surface))] p-4">
             <div className="flex items-center gap-3">
@@ -54,7 +54,7 @@ export default function StatCard({
                             {trend === "up" ? "↗" : "↘"} {change}
                         </p>
                        <span className="text-[11px]" >
-                         {massage}
+                         {message}
                        </span>
                     </div>
 

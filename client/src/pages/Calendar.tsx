@@ -126,10 +126,11 @@ function Calendar() {
             </div>
 
             {/* Total */}
-            <div className="flex items-center justify-between rounded-lg  bg-[rgb(var(--card))] p-3">
+            <div className="flex items-center justify-between rounded-lg bg-[rgb(var(--card))] p-3">
+                {/* LEFT */}
                 <div className="flex items-center gap-2.5">
                     <CalendarDays className="h-6 w-6 text-[rgb(var(--primary))]/40" />
-                    <div>
+                    <div className="leading-tight">
                         <p className="text-[10px] text-[rgb(var(--muted))]">
                             Total for{" "}
                             {selectedDate.toLocaleString("default", {
@@ -137,11 +138,12 @@ function Calendar() {
                                 year: "numeric",
                             })}
                         </p>
-                        <p className="text-lg font-semibold text-[rgb(var(--text))]">
-                            80,000
-                        </p>
                     </div>
                 </div>
+                {/* RIGHT (BALANCE) */}
+                <p className="text-lg font-semibold text-[rgb(var(--text))]">
+                    80,000
+                </p>
             </div>
             {/* Transactions */}
             <RecentTransactions star={false} viewAll={false} />
