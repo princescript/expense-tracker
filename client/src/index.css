@@ -1,6 +1,34 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300..800&display=swap');
 @import "tailwindcss";
 
+/* -------------------
+   GLOBAL SCROLLBAR
+-------------------- */
+
+/* Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--primary) / 0.35);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--primary) / 0.6);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--primary) / 0.35) transparent;
+}
 /* -------------------------
    FONT SYSTEM
 ------------------------- */
@@ -82,6 +110,62 @@ body {
   letter-spacing: -0.01em;
 }
 
+@layer utilities {
+  /* 🧠 FIX: stable surface system (prevents flicker) */
+  .surface {
+    background-color: rgb(var(--surface));
+  }
+
+  .card {
+    background-color: rgb(var(--card));
+    border: 1px solid rgb(var(--border));
+  }
+
+  .card-hover {
+    transition: all 0.2s ease;
+  }
+
+  .card-hover:hover {
+    border-color: rgb(var(--primary) / 0.4);
+    background-color: rgb(var(--surface));
+  }
+
+  /* inputs must NEVER flicker */
+  .input {
+    background-color: transparent;
+    border: 1px solid rgb(var(--border));
+    color: rgb(var(--text));
+    transition: border 0.2s ease;
+  }
+
+  .input:focus {
+    outline: none;
+    border-color: rgb(var(--primary));
+  }
+
+  /* modal layer fix */
+  .overlay {
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(6px);
+  }
+
+  .modal {
+    background-color: rgb(var(--card));
+    border: 1px solid rgb(var(--border));
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  }
+
+  /* chips */
+  .chip {
+    background-color: rgb(var(--surface));
+    border: 1px solid rgb(var(--border));
+    transition: all 0.2s ease;
+  }
+
+  .chip:hover {
+    border-color: rgb(var(--primary) / 0.4);
+  }
+}
 /* -------------------------
    OPTIONAL UTILITIES
 ------------------------- */
@@ -99,24 +183,4 @@ body {
   .text-info { color: rgb(var(--info)); }
 
   .border-theme { border-color: rgb(var(--border)); }
-}
-
-/* -------------------------
-   SCROLLBAR
-------------------------- */
-.sidebar-scroll::-webkit-scrollbar {
-  width: 4px;
-}
-
-.sidebar-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sidebar-scroll::-webkit-scrollbar-thumb {
-  background: rgb(var(--primary) / 0.35);
-  border-radius: 999px;
-}
-
-.sidebar-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgb(var(--primary) / 0.6);
 }

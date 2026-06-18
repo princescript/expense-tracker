@@ -1,7 +1,8 @@
 type StatCardProps = {
     title: string;
     value: string;
-    change: string;
+    change?: string;
+    massage?: string;
     trend: "up" | "down";
     icon: React.ReactNode;
     variant?: "green" | "red" | "purple";
@@ -11,6 +12,7 @@ export default function StatCard({
     title,
     value,
     change,
+    massage,
     trend,
     icon,
     variant = "green",
@@ -30,53 +32,82 @@ export default function StatCard({
             change: "text-violet-400",
         },
     };
-
     const s = styles[variant];
+    console.log(massage)
+    return (
+        <div className="rounded-xl border border-[rgb(var(--border))] bg-[rgb(var(--surface))] p-4">
+            <div className="flex items-center gap-3">
+                {/* ICON */}
+                <div className={`p-2.5 rounded-lg ${s.iconBg}`}>
+                    {icon}
+                </div>
+                {/* TEXT */}
+                <div className="leading-tight">
+                    <p className="text-xs text-[rgb(var(--muted))]">
+                        {title}
+                    </p>
+                    <h2 className="text-xl font-semibold text-[rgb(var(--text))]">
+                        {value}
+                    </h2>
+                    <div className="flex gap-3">
+                        <p className={`text-[11px] ${s.change}`}>
+                            {trend === "up" ? "↗" : "↘"} {change}
+                        </p>
+                       <span className="text-[11px]" >
+                         {massage}
+                       </span>
+                    </div>
 
-   return (
-    <div
-        className="
-            rounded-xl
-            bg-[rgb(var(--surface))]
-            p-4
-
-            shadow-[0_2px_10px_rgba(0,0,0,0.05),0_8px_24px_rgba(0,0,0,0.08)]
-
-            transition-all duration-300 ease-out
-            hover:-translate-y-1
-            hover:shadow-[0_8px_20px_rgba(0,0,0,0.08),0_16px_40px_rgba(0,0,0,0.12)]
-        "
-    >
-        <div className="flex items-center gap-3">
-
-            {/* ICON */}
-            <div
-                className={`
-                    p-2.5 rounded-lg
-                    transition-all duration-300
-                    hover:scale-105
-                    ${s.iconBg}
-                `}
-            >
-                {icon}
+                </div>
             </div>
-
-            {/* TEXT */}
-            <div className="leading-tight">
-                <p className="text-xs text-[rgb(var(--muted))]">
-                    {title}
-                </p>
-
-                <h2 className="text-xl font-semibold text-[rgb(var(--text))]">
-                    {value}
-                </h2>
-
-                <p className={`text-[11px] ${s.change}`}>
-                    {trend === "up" ? "↗" : "↘"} {change}
-                </p>
-            </div>
-
         </div>
-    </div>
-);
+    );
 }
+
+
+// return (
+//     <div
+//         className="
+//             rounded-xl
+//             bg-[rgb(var(--surface))]
+//             p-4
+
+//             shadow-[0_2px_10px_rgba(0,0,0,0.05),0_8px_24px_rgba(0,0,0,0.08)]
+
+//             transition-all duration-300 ease-out
+//             hover:-translate-y-1
+//             hover:shadow-[0_8px_20px_rgba(0,0,0,0.08),0_16px_40px_rgba(0,0,0,0.12)]
+//         "
+//     >
+//         <div className="flex items-center gap-3">
+
+//             {/* ICON */}
+//             <div
+//                 className={`
+//                     p-2.5 rounded-lg
+//                     transition-all duration-300
+//                     hover:scale-105
+//                     ${s.iconBg}
+//                 `}
+//             >
+//                 {icon}
+//             </div>
+
+//             {/* TEXT */}
+//             <div className="leading-tight">
+//                 <p className="text-xs text-[rgb(var(--muted))]">
+//                     {title}
+//                 </p>
+
+//                 <h2 className="text-xl font-semibold text-[rgb(var(--text))]">
+//                     {value}
+//                 </h2>
+
+//                 <p className={`text-[11px] ${s.change}`}>
+//                     {trend === "up" ? "↗" : "↘"} {change}
+//                 </p>
+//             </div>
+
+//         </div>
+//     </div>
+// );

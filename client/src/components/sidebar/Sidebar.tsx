@@ -3,13 +3,13 @@ import {
     Receipt,
     BarChart3,
     Target,
-    Calendar,
     Wallet,
     Settings,
     Moon,
     Sun,
     LogOut,
     User,
+    Calendar,
 } from "lucide-react";
 import SidebarItem from "./SidebarItem";
 import clsx from "clsx";

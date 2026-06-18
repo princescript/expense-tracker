@@ -33,15 +33,24 @@ function isCategoryKey(value: string): value is CategoryKey {
 
 export type Props = {
   transactions?: TransactionDto[];
+  star?: boolean,
+  viewAll?: boolean
 };
 
 export default function RecentTransactions({
   transactions = DEFAULT_TRANSACTIONS,
+  star = true,
+  viewAll = true
 }: Props) {
   const [highlighted, setHighlighted] = useState<Record<number, boolean>>({});
 
   function toggleHighlight(id: number) {
-    setHighlighted((prev) => ({ ...prev, [id]: !prev[id] }));
+    if (!star) return;
+
+    setHighlighted((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
   }
 
   return (
@@ -53,13 +62,14 @@ export default function RecentTransactions({
           Recent Transactions
         </h2>
 
-        <Link
-          to="/transactions"
-          className="flex items-center gap-1 text-xs text-[rgb(var(--primary))] hover:opacity-80"
-        >
-          View All
-          <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
+        {viewAll &&
+          <Link
+            to="/transactions"
+            className="flex items-center gap-1 text-xs text-[rgb(var(--primary))] hover:opacity-80"
+          >
+            View All
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>}
       </div>
 
       {/* LIST */}
@@ -80,8 +90,7 @@ export default function RecentTransactions({
               key={tx.id}
               onClick={() => toggleHighlight(tx.id)}
               className={`relative flex cursor-pointer items-center justify-between rounded-xl px-4 py-3 transition
-                hover:bg-[rgb(var(--card))] ${
-                  isHighlighted ? "bg-yellow-500/5" : ""
+                hover:bg-[rgb(var(--card))] ${isHighlighted ? "bg-yellow-500/5" : ""
                 }`}
             >
 
@@ -110,27 +119,27 @@ export default function RecentTransactions({
               <div className="flex items-center gap-3">
 
                 <span
-                  className={`text-sm font-semibold ${
-                    isIncome
-                      ? "text-[rgb(var(--success))]"
-                      : "text-[rgb(var(--danger))]"
-                  }`}
+                  className={`text-sm font-semibold ${isIncome
+                    ? "text-[rgb(var(--success))]"
+                    : "text-[rgb(var(--danger))]"
+                    }`}
                 >
                   {tx.amount.toLocaleString("en-IN")}
                 </span>
 
-                <button
-                  className={`p-1.5 transition ${
-                    isHighlighted
+                {star &&
+                  <button
+                    className={`p-1.5 transition ${isHighlighted
                       ? "text-yellow-400"
                       : "text-[rgb(var(--muted))] hover:text-[rgb(var(--text))]"
-                  }`}
-                >
-                  <Star
-                    className="h-4 w-4"
-                    fill={isHighlighted ? "currentColor" : "none"}
-                  />
-                </button>
+                      }`}
+                  >
+                    <Star
+                      className="h-4 w-4"
+                      fill={isHighlighted ? "currentColor" : "none"}
+                    />
+                  </button>
+                }
               </div>
             </div>
           );
