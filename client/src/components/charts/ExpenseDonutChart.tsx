@@ -10,7 +10,7 @@ import {
 type DataItem = {
   name: string;
   value: number;
-  color: string;
+  color?: string;
 };
 
 type Props = {
@@ -23,7 +23,7 @@ export default function ExpenseDonutChart({
   totalBalance = 0,
 }: Props) {
   const totalExpense = data.reduce((sum, item) => sum + item.value, 0);
-
+  console.log("donut", data)
   return (
     <div
       className={`rounded-xl bg-[rgb(var(--surface))] p-4 shadow-sm select-none `}
@@ -115,26 +115,28 @@ export default function ExpenseDonutChart({
 
           {/* LEGEND */}
           <div className="w-full md:w-1/2 space-y-3">
-            {data.map((item) => (
-              <div
-                key={item.name}
-                className="flex items-center justify-between"
-              >
-                <div className="flex items-center gap-2">
-                  <span
-                    className="h-2.5 w-2.5 rounded-full"
-                    style={{ backgroundColor: item.color }}
-                  />
-                  <span className="text-sm text-[rgb(var(--muted))]">
-                    {item.name}
+            {[...data]
+              .sort((a, b) => b.value - a.value)
+              .map((item) => (
+                <div
+                  key={item.name}
+                  className="flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="h-2.5 w-2.5 rounded-full"
+                      style={{ backgroundColor: item.color }}
+                    />
+                    <span className="text-sm text-[rgb(var(--muted))]">
+                      {item.name}
+                    </span>
+                  </div>
+
+                  <span className="text-sm font-medium">
+                    ₹{item.value.toLocaleString("en-IN")}
                   </span>
                 </div>
-
-                <span className="text-sm font-medium">
-                  ₹{item.value.toLocaleString("en-IN")}
-                </span>
-              </div>
-            ))}
+              ))}
           </div>
 
         </div>
