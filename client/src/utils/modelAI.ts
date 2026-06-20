@@ -1,295 +1,277 @@
-import type { PaymentMethod, TransactionCategory, TransactionType } from "../mocks/transactions";
+export interface Transaction {
+  id: number;
+  title: string;
+  amount: number;
+  category: string;
+  type: "income" | "expense";
+  paymentMethod: string;
+  date: string;
+  description: string;
+}
 
-/* ================================
-   RULE MAPS
-================================ */
+/* ========================================================================
+   1. DICTIONARIES, ENTITIES, AND STRUCTURAL DICTIONARY MAPS
+   ======================================================================== */
+const INCOME_SIGNALS: Record<string, number> = { salary: 5, payroll: 5, stipend: 4, wages: 3, bonus: 4, received: 3, credited: 5, income: 3, refund: 5, refunded: 5, cashback: 4, payout: 4, earned: 4 };
+const EXPENSE_SIGNALS: Record<string, number> = { paid: 3, pay: 1, spent: 3, bought: 3, purchased: 4, debited: 5, withdrew: 3, billed: 2, sent: 2 };
 
-const CATEGORY_RULES: Record<TransactionCategory, string[]> = {
-    Salary: ["salary", "payroll", "stipend", "wages", "bonus"],
-    Freelance: ["freelance", "client payment", "client", "invoice", "gig", "upwork", "fiverr"],
-    Investment: ["stocks", "stock", "mutual fund", "sip", "investment", "invested", "crypto", "bitcoin", "shares", "dividend", "zerodha", "groww", "indmoney"],
-    Bills: ["bill", "electricity", "water bill", "rent", "internet", "wifi", "broadband", "mobile bill", "recharge", "emi", "insurance", "premium", "dth", "gas", "pipeline"],
-    Education: ["course", "tuition", "college", "school fee", "school", "fees", "fee", "textbook", "exam fee", "udemy", "coursera"],
-    Entertainment: ["movie", "movie ticket", "netflix", "spotify", "prime video", "hotstar", "video game", "gaming", "cinema", "theater", "concert", "pub", "clubbing"],
-    Transport: ["uber", "ola", "rapido", "bus", "bus ticket", "train", "train ticket", "metro", "fuel", "petrol", "diesel", "cab", "taxi", "auto", "flight", "flight ticket", "parking", "toll", "irctc"],
-    "Food & Drinks": ["restaurant", "lunch", "dinner", "breakfast", "pizza", "coffee", "tea", "snacks", "zomato", "swiggy", "food", "groceries", "grocery", "burger", "cafe", "blinkit", "instamart", "starbucks"],
-    Shopping: ["amazon", "flipkart", "myntra", "mall", "clothes", "shirt", "shoes", "shopping", "meesho"],
-    Others: [],
+// Entity mapping forces semantic grouping and structural semantic anchors
+interface EntityDefinition {
+  canonicalName: string;
+  category: string;
+  defaultAction: string;
+}
+
+const ENTITY_HINTS: Record<string, EntityDefinition> = {
+  zomato: { canonicalName: "Zomato", category: "Food & Drinks", defaultAction: "Order" },
+  swiggy: { canonicalName: "Swiggy", category: "Food & Drinks", defaultAction: "Order" },
+  starbucks: { canonicalName: "Starbucks", category: "Food & Drinks", defaultAction: "Coffee" },
+  mcdonalds: { canonicalName: "McDonalds", category: "Food & Drinks", defaultAction: "Burger" },
+  uber: { canonicalName: "Uber", category: "Transport", defaultAction: "Ride" },
+  ola: { canonicalName: "Ola", category: "Transport", defaultAction: "Ride" },
+  rapido: { canonicalName: "Rapido", category: "Transport", defaultAction: "Ride" },
+  irctc: { canonicalName: "IRCTC", category: "Transport", defaultAction: "Ticket" },
+  amazon: { canonicalName: "Amazon", category: "Shopping", defaultAction: "Purchase" },
+  flipkart: { canonicalName: "Flipkart", category: "Shopping", defaultAction: "Purchase" },
+  myntra: { canonicalName: "Myntra", category: "Shopping", defaultAction: "Purchase" },
+  netflix: { canonicalName: "Netflix", category: "Entertainment", defaultAction: "Subscription" },
+  spotify: { canonicalName: "Spotify", category: "Entertainment", defaultAction: "Subscription" },
+  zerodha: { canonicalName: "Zerodha", category: "Investment", defaultAction: "Trade" },
+  groww: { canonicalName: "Groww", category: "Investment", defaultAction: "Trade" }
 };
 
-const PAYMENT_RULES: Record<PaymentMethod, string[]> = {
-    UPI: ["upi", "gpay", "google pay", "phonepe", "paytm", "bhim", "cred"],
-    Card: ["credit card", "debit card", "card", "visa", "mastercard", "amex", "diners"],
-    "Bank Transfer": ["neft", "imps", "rtgs", "bank transfer", "net banking", "bank", "ach"],
-    Cash: ["cash"],
+const CATEGORY_MAP: Record<string, { cat: string; weight: number }> = {
+  restaurant: { cat: "Food & Drinks", weight: 3 }, cafe: { cat: "Food & Drinks", weight: 3 }, pizza: { cat: "Food & Drinks", weight: 2 }, burger: { cat: "Food & Drinks", weight: 2 }, lunch: { cat: "Food & Drinks", weight: 2 }, dinner: { cat: "Food & Drinks", weight: 2 }, breakfast: { cat: "Food & Drinks", weight: 2 }, coffee: { cat: "Food & Drinks", weight: 1 }, food: { cat: "Food & Drinks", weight: 1 }, groceries: { cat: "Food & Drinks", weight: 2 }, grocery: { cat: "Food & Drinks", weight: 2 },
+  bus: { cat: "Transport", weight: 3 }, train: { cat: "Transport", weight: 3 }, metro: { cat: "Transport", weight: 3 }, fuel: { cat: "Transport", weight: 3 }, petrol: { cat: "Transport", weight: 3 }, cab: { cat: "Transport", weight: 2 }, taxi: { cat: "Transport", weight: 2 }, flight: { cat: "Transport", weight: 4 },
+  rent: { cat: "Bills", weight: 5 }, electricity: { cat: "Bills", weight: 5 }, water: { cat: "Bills", weight: 4 }, internet: { cat: "Bills", weight: 4 }, wifi: { cat: "Bills", weight: 3 }, bill: { cat: "Bills", weight: 2 }, recharge: { cat: "Bills", weight: 3 }, emi: { cat: "Bills", weight: 5 }, insurance: { cat: "Bills", weight: 4 },
+  mall: { cat: "Shopping", weight: 2 }, clothes: { cat: "Shopping", weight: 3 }, shirt: { cat: "Shopping", weight: 3 }, shoes: { cat: "Shopping", weight: 3 }, shopping: { cat: "Shopping", weight: 2 },
+  stocks: { cat: "Investment", weight: 5 }, stock: { cat: "Investment", weight: 4 }, mutual: { cat: "Investment", weight: 5 }, fund: { cat: "Investment", weight: 3 }, sip: { cat: "Investment", weight: 5 }, crypto: { cat: "Investment", weight: 5 }, shares: { cat: "Investment", weight: 4 }
 };
 
-const INCOME_WORDS = ["salary", "received", "credited", "income", "refund", "refunded", "cashback", "payout", "earned", "earnt", "bonus"];
-const EXPENSE_WORDS = ["paid", "pay", "paying", "spent", "bought", "purchased", "debited", "withdrew", "billed", "sent"];
+const PAYMENT_MAP: Record<string, { method: string; weight: number }> = {
+  upi: { method: "UPI", weight: 3 }, gpay: { method: "UPI", weight: 4 }, phonepe: { method: "UPI", weight: 4 }, paytm: { method: "UPI", weight: 4 }, bhim: { method: "UPI", weight: 4 }, cred: { method: "UPI", weight: 4 },
+  credit: { method: "Card", weight: 4 }, debit: { method: "Card", weight: 4 }, card: { method: "Card", weight: 2 }, visa: { method: "Card", weight: 3 }, mastercard: { method: "Card", weight: 3 }, amex: { method: "Card", weight: 5 },
+  neft: { method: "Bank Transfer", weight: 5 }, imps: { method: "Bank Transfer", weight: 5 }, rtgs: { method: "Bank Transfer", weight: 5 }, bank: { method: "Bank Transfer", weight: 1 }, transfer: { method: "Bank Transfer", weight: 2 }, netbanking: { method: "Bank Transfer", weight: 3 },
+  cash: { method: "Cash", weight: 5 }
+};
 
-const TITLE_STOPWORDS = new Set([
-    "for", "of", "to", "from", "on", "via", "by", "the", "a", "an", "and",
-    "at", "in", "with", "using", "amount", "today", "yesterday",
-    "rs", "inr", "rupees", "bucks", "towards",
-    "took", "take", "got", "get", "gave", "give", "ordered", "order",
-    "bought", "buy", "as", "is", "this", "month",
+// Expanded aggressive real-world stopword telemetry array
+const SYSTEMIC_STOPWORDS = new Set([
+  "for", "of", "to", "from", "on", "via", "by", "the", "a", "an", "and", "at", "in", "with", "using", 
+  "amount", "today", "yesterday", "rs", "inr", "rupees", "bucks", "towards", "took", "take", "got", 
+  "get", "gave", "give", "ordered", "order", "bought", "buy", "as", "is", "this", "month", "had", 
+  "around", "hours", "near", "station", "there", "some", "someone", "friends", "colleagues", "me", "my"
 ]);
 
-/* ================================
-   CORE HELPER LINGUISTICS
-================================ */
-
-/**
- * Strict regex word-boundary lookup.
- * Protects sub-string leakage safely.
- */
-function testWordBoundary(text: string, phrase: string): boolean {
-    const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    return new RegExp(`(?<![a-zA-Z0-9])${escaped}(?![a-zA-Z0-9])`, "i").test(text);
+/* ========================================================================
+   2. HEURISTIC VALIDATORS & SEMANTIC FALLBACK BUILDERS
+   ======================================================================== */
+function isBadTitle(title: string): boolean {
+  const normalized = title.trim();
+  if (!normalized) return true;
+  
+  const words = normalized.split(/\s+/);
+  
+  return (
+    words.length < 2 || // Rejects single word fragments like "After"
+    words.every(w => w.length <= 2) || // Rejects garbage syntax fragments like "d x near"
+    /^(after|before|had|paid|spent|received|credited|refund|for|around|hours|station)$/i.test(normalized)
+  );
 }
 
-/* ================================
-   ADVANCED AMOUNT & CONTEXT EXTRACTION
-================================ */
-
-const NUMBER_RE = "\\d{1,3}(?:,\\d{2,3})+(?:\\.\\d+)?|\\d+(?:\\.\\d+)?";
-
-function parseNum(raw: string): number {
-    return Number(raw.replace(/,/g, ""));
+function generateSemanticFallback(category: string, type: string): string {
+  const map: Record<string, string> = {
+    "Food & Drinks": "Food Expense",
+    "Transport": "Travel Expense",
+    "Bills": "Bill Payment",
+    "Shopping": "Shopping Expense",
+    "Investment": "Investment Transaction",
+    "Entertainment": "Entertainment Spend",
+    "Salary": "Salary Payout"
+  };
+  return map[category] ?? `${category} ${type === "income" ? "Income" : "Expense"}`;
 }
 
-/**
- * Parses numeric text while retaining full tracking of proximity to currency symbols.
- */
-function extractAmountAndContext(text: string): { amount: number | null; clearedText: string } {
-    const patterns = [
-        new RegExp(`₹\\s*(${NUMBER_RE})`, "i"),
-        new RegExp(`(?:rs\\.?|inr|rupees)\\s*(${NUMBER_RE})`, "i"),
-        new RegExp(`(${NUMBER_RE})\\s*(?:rs\\.?|inr|rupees|bucks)`, "i")
-    ];
+/* ========================================================================
+   3. HIGH-PERFORMANCE TRANSLATION ENGINE
+   ======================================================================== */
+export function parseTransactionHybrid(input: string): Transaction | Record<string, never> {
+  if (!input || !input.trim()) return {};
 
-    for (const regex of patterns) {
-        const match = text.match(regex);
+  // Clean raw symbols to defend against token fracture
+  const normalized = input.replace(/[₹$€]/g, " $& ").trim();
+  const tokens = normalized.split(/\s+/);
 
-        if (!match) continue;
+  // --- PHASE 1: SINGLE PASS LINEAR TOKEN SCAN ---
+  const numericCandidates: { value: number; index: number; hasIndicator: boolean }[] = [];
+  let incomeScore = 0;
+  let expenseScore = 0;
+  
+  const categoryScores: Record<string, number> = {};
+  const paymentScores: Record<string, number> = {};
+  
+  // Track targeted structures captured inline
+  const capturedEntities: EntityDefinition[] = [];
+  const validNouns: string[] = [];
 
-        const capturedNumber = match[1] ?? match[0];
+  let dateOffsetDays: number | null = null;
 
-        return {
-            amount: parseNum(capturedNumber),
-            clearedText: text.replace(match[0], " "),
-        };
+  for (let i = 0; i < tokens.length; i++) {
+    const rawToken = tokens[i];
+    const cleanLower = rawToken.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, "").toLowerCase();
+    
+    if (!cleanLower) continue;
+
+    // 1. Structural Numeric Extraction
+    const cleanNumericStr = cleanLower.replace(/,/g, "");
+    if (/^\d+(?:\.\d+)?$/.test(cleanNumericStr)) {
+      const val = parseFloat(cleanNumericStr);
+      let hasIndicator = false;
+      if (i > 0) {
+        const prev = tokens[i - 1].toLowerCase();
+        if (["₹", "rs", "rs.", "inr", "rupees", "paid", "spent", "credited", "refund"].includes(prev)) hasIndicator = true;
+      }
+      if (i < tokens.length - 1 && !hasIndicator) {
+        const next = tokens[i + 1].toLowerCase();
+        if (["rs", "inr", "rupees", "bucks"].includes(next)) hasIndicator = true;
+      }
+      numericCandidates.push({ value: val, index: i, hasIndicator });
+      continue;
     }
 
-    // Fallback Proximity Heuristic: Detects all valid logical numbers
-    const allMatches = [...text.matchAll(new RegExp(NUMBER_RE, "g"))];
-    if (allMatches.length === 0) return { amount: null, clearedText: text };
+    // 2. Structural Entity Anchor Capture
+    if (ENTITY_HINTS[cleanLower]) {
+      const entity = ENTITY_HINTS[cleanLower];
+      capturedEntities.push(entity);
+      categoryScores[entity.category] = (categoryScores[entity.category] || 0) + 5; // Absolute Priority Weight Boost
+    }
 
-    // If a number is structurally flanked by common currency indicators, prioritize it over pure size
-    const scoredNumbers = allMatches.map((m) => {
-        const val = parseNum(m[0]);
-        const index = m.index ?? 0;
+    // 3. System Linguistic Rule Mapping
+    if (INCOME_SIGNALS[cleanLower]) incomeScore += INCOME_SIGNALS[cleanLower];
+    if (EXPENSE_SIGNALS[cleanLower]) expenseScore += EXPENSE_SIGNALS[cleanLower];
 
-        // Look at immediate surrounding context tokens window (-7 to +12 characters)
-        const contextWindow = text.slice(Math.max(0, index - 7), Math.min(text.length, index + m[0].length + 12)).toLowerCase();
-        let priorityScore = val; // Base score is numeric value
+    if (CATEGORY_MAP[cleanLower]) {
+      const entry = CATEGORY_MAP[cleanLower];
+      categoryScores[entry.cat] = (categoryScores[entry.cat] || 0) + entry.weight;
+    }
 
-        if (/\b(paid|spent|cost|total|bill|sent|rs|inr|₹)\b/i.test(contextWindow)) {
-            priorityScore += 100000; // Artificially boost numbers linked to currency identifiers
+    if (PAYMENT_MAP[cleanLower]) {
+      const entry = PAYMENT_MAP[cleanLower];
+      paymentScores[entry.method] = (paymentScores[entry.method] || 0) + entry.weight;
+    }
+
+    // 4. Temporal Chronology Tracking
+    if (cleanLower === "yesterday") dateOffsetDays = 1;
+    if (cleanLower === "today") dateOffsetDays = 0;
+    if (cleanLower === "days" && i > 0 && tokens[i + 1]?.toLowerCase() === "ago") {
+      const prevDigits = tokens[i - 1].replace(/[^0-9]/g, "");
+      if (prevDigits) dateOffsetDays = parseInt(prevDigits, 10);
+    }
+
+    // 5. Structural Core Noun Accumulation
+    const isSystemicNoise = 
+      SYSTEMIC_STOPWORDS.has(cleanLower) || 
+      INCOME_SIGNALS[cleanLower] !== undefined || 
+      EXPENSE_SIGNALS[cleanLower] !== undefined ||
+      PAYMENT_MAP[cleanLower] !== undefined;
+
+    if (!isSystemicNoise) {
+      const preservedNoun = rawToken.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, "");
+      if (preservedNoun.length > 1) {
+        // Enforce clean formatting matching structural patterns
+        const capitalized = preservedNoun.charAt(0).toUpperCase() + preservedNoun.slice(1).toLowerCase();
+        if (!validNouns.includes(capitalized)) {
+          validNouns.push(capitalized);
         }
-
-        return { val, fullMatch: m[0], index, priorityScore };
-    });
-
-    const bestTarget = scoredNumbers.reduce((max, cur) => (cur.priorityScore > max.priorityScore ? cur : max), scoredNumbers[0]);
-
-    const clearedText = text.slice(0, bestTarget.index) + " " + text.slice(bestTarget.index + bestTarget.fullMatch.length);
-    return { amount: bestTarget.val, clearedText };
-}
-
-/* ================================
-   DYNAMIC LINGUISTIC DETECTORS
-================================ */
-
-function detectType(text: string): TransactionType {
-    const incomeHits = INCOME_WORDS.filter((w) => testWordBoundary(text, w));
-    const expenseHits = EXPENSE_WORDS.filter((w) => testWordBoundary(text, w));
-
-    if (incomeHits.length && expenseHits.length) {
-        const textLower = text.toLowerCase();
-        const firstIncomeIdx = Math.min(...incomeHits.map((w) => textLower.indexOf(w)));
-        const firstExpenseIdx = Math.min(...expenseHits.map((w) => textLower.indexOf(w)));
-        return firstIncomeIdx <= firstExpenseIdx ? "income" : "expense";
+      }
     }
-    return incomeHits.length ? "income" : "expense";
-}
+  }
 
-function detectCategory(text: string): TransactionCategory {
-    let best: TransactionCategory = "Others";
-    let bestScore = 0;
-    let bestSpecificity = 0;
+  // --- PHASE 2: DETACHED INTENT POST-PROCESSING ---
 
-    for (const [category, keywords] of Object.entries(CATEGORY_RULES)) {
-        const hits = keywords.filter((k) => testWordBoundary(text, k));
-        if (hits.length === 0) continue;
+  // CRITICAL FAIL-SAFE 1: Amount Validation
+  if (numericCandidates.length === 0) return {};
+  const resolvedAmount = numericCandidates.sort((a, b) => {
+    if (a.hasIndicator !== b.hasIndicator) return a.hasIndicator ? -1 : 1;
+    return b.value - a.value;
+  })[0].value;
+  
+  if (resolvedAmount <= 0) return {};
 
-        const score = hits.length;
-        const specificity = Math.max(...hits.map((h) => h.length));
+  // Resolve Primary Action Intent
+  const finalType: "income" | "expense" = (incomeScore >= expenseScore && incomeScore > 0) ? "income" : "expense";
 
-        if (score > bestScore || (score === bestScore && specificity > bestSpecificity)) {
-            best = category as TransactionCategory;
-            bestScore = score;
-            bestSpecificity = specificity;
-        }
+  // Resolve Category Matrix
+  let finalCategory = "Others";
+  let maxCatScore = 0;
+  for (const [cat, score] of Object.entries(categoryScores)) {
+    if (score > maxCatScore) {
+      maxCatScore = score;
+      finalCategory = cat;
     }
-    return best;
-}
+  }
 
-function detectPaymentMethod(text: string): PaymentMethod {
-    for (const [method, keywords] of Object.entries(PAYMENT_RULES)) {
-        if (keywords.some((k) => testWordBoundary(text, k))) {
-            return method as PaymentMethod;
-        }
+  // Resolve Payment Infrastructure Map
+  let finalPaymentMethod = "UPI";
+  let maxPayScore = 0;
+  for (const [method, score] of Object.entries(paymentScores)) {
+    if (score > maxPayScore) {
+      maxPayScore = score;
+      finalPaymentMethod = method;
     }
-    return "UPI";
-}
+  }
 
-/* ================================
-   SMART CHRONOLOGICAL DATE PROCESSING
-================================ */
+  // Finalize Date Calculations
+  const dateObj = new Date();
+  if (dateOffsetDays !== null) {
+    dateObj.setDate(dateObj.getDate() - dateOffsetDays);
+  }
 
-const MONTH_NAMES = "jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?";
+  // --- PHASE 3: HIGHER-ORDER INTENT TITLE RECONSTRUCTION ---
+  let reconstructedTitle = "";
 
-function extractDate(text: string): Date {
-    const now = new Date();
-    const currentYear = now.getFullYear();
+  // Strategy A: Anchor Generation via Entity Mapping
+  if (capturedEntities.length > 0) {
+    const primaryEntity = capturedEntities[0];
+    
+    // Check if the user passed explicit intent descriptors alongside the entity (e.g., "Burger")
+    const contextualModifier = validNouns.find(noun => 
+      noun.toLowerCase() !== primaryEntity.canonicalName.toLowerCase() &&
+      CATEGORY_MAP[noun.toLowerCase()]?.cat === primaryEntity.category
+    );
 
-    if (testWordBoundary(text, "yesterday")) {
-        const d = new Date(now);
-        d.setDate(d.getDate() - 1);
-        return d;
+    if (contextualModifier) {
+      reconstructedTitle = `${primaryEntity.canonicalName} ${contextualModifier}`;
+    } else {
+      // Intent mapping check (e.g., "Refund" mapping outscales normal flow)
+      const isRefundIntent = tokens.some(t => /refund/i.test(t));
+      const actionLabel = isRefundIntent ? "Refund" : primaryEntity.defaultAction;
+      reconstructedTitle = `${primaryEntity.canonicalName} ${actionLabel}`;
     }
-    if (testWordBoundary(text, "today")) return now;
+  } else {
+    // Strategy B: Filtered Meaningful Noun Reconstruction
+    reconstructedTitle = validNouns.slice(0, 4).join(" ");
+  }
 
-    const daysAgo = text.match(/(\d+)\s*days?\s*ago/i);
-    if (daysAgo) {
-        const d = new Date(now);
-        d.setDate(d.getDate() - Number(daysAgo[1]));
-        return d;
-    }
+  // Strategy C: Structural Heuristic Gate Check
+  if (isBadTitle(reconstructedTitle)) {
+    reconstructedTitle = generateSemanticFallback(finalCategory, finalType);
+  }
 
-    const numeric = text.match(/(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})/);
-    if (numeric) {
-        const [, dd, mm, yy] = numeric;
-        const year = yy.length === 2 ? Number(`20${yy}`) : Number(yy);
-        return new Date(year, Number(mm) - 1, Number(dd));
-    }
+  // CRITICAL FAIL-SAFE 2: Outbound Confidence Verification
+  // If we ended up with no categorical mapping and structural title reconstruction failed completely
+  if (finalCategory === "Others" && isBadTitle(reconstructedTitle)) {
+    return {}; // Terminate to execute fallback trigger to processing LLM layer
+  }
 
-    const named = text.match(new RegExp(`(\\d{1,2})\\s+(${MONTH_NAMES})(?:\\s+(\\d{4}))?`, "i"));
-    if (named) {
-        const [, dd, monStr, yy] = named;
-        let parsedYear = yy ? Number(yy) : currentYear;
-
-        const d = new Date(`${dd} ${monStr} ${parsedYear}`);
-
-        // Smart Historical Inference Guardrail:
-        // If no explicit year was typed, and parsing forces the transaction into the future,
-        // contextually step back exactly one calendar year (e.g., parsing "Dec 24" while in "Jan 2026").
-        if (!yy && d.getTime() > now.getTime()) {
-            d.setFullYear(currentYear - 1);
-        }
-        if (!isNaN(d.getTime())) return d;
-    }
-
-    return now;
-}
-
-function stripDatePhrases(text: string): string {
-    return text
-        .replace(/\b\d+\s*days?\s*ago\b/gi, " ")
-        .replace(/\b(today|yesterday)\b/gi, " ")
-        .replace(/\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b/gi, " ")
-        .replace(new RegExp(`\\b\\d{1,2}\\s+(${MONTH_NAMES})(?:\\s+\\d{4})?\\b`, "gi"), " ");
-}
-
-/* ================================
-   PRESERVATION TITLE EXTRACTION ENGINE
-================================ */
-
-function extractTitle(clearedText: string, rawOriginalPrompt: string, category: TransactionCategory, type: TransactionType): string {
-    // Step 1: Strip out systemic structural parameters cleanly
-    let workingText = stripDatePhrases(clearedText);
-    workingText = workingText.replace(/₹/g, " ").replace(/\b(rs\.?|inr|rupees|bucks)\b/gi, " ");
-
-    // Collect words to strip safely out of token pipelines
-    const blacklistTokens = new Set<string>();
-    Object.values(PAYMENT_RULES).flat().forEach(w => blacklistTokens.add(w.toLowerCase()));
-    [...INCOME_WORDS, ...EXPENSE_WORDS].forEach(w => blacklistTokens.add(w));
-
-    // Step 2: Build a dictionary map matching lowercase normalized words back to original casing values
-    const wordsWithOriginalCasing = rawOriginalPrompt.split(/\s+/);
-    const casingMap = new Map<string, string>();
-
-    wordsWithOriginalCasing.forEach(word => {
-        // Strip trailing/leading punctuation markers for structural dictionary keys
-        const cleanKey = word.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, "").toLowerCase();
-        if (cleanKey) casingMap.set(cleanKey, word);
-    });
-
-    // Step 3: Parse tokens from the remaining context pools
-    const finalTokens = workingText
-        .split(/\s+/)
-        .map((tok) => tok.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, ""))
-        .filter((tok) => {
-            const lower = tok.toLowerCase();
-            return lower && !TITLE_STOPWORDS.has(lower) && !blacklistTokens.has(lower);
-        })
-        .map((tok) => {
-            const lower = tok.toLowerCase();
-            // Recover original exact capitalization configuration (like "McDonalds" or "Zomato")
-            const originalCasedWord = casingMap.get(lower);
-            if (originalCasedWord) {
-                return originalCasedWord.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, "");
-            }
-            return tok.charAt(0).toUpperCase() + tok.slice(1);
-        });
-
-    const parsedTitle = finalTokens.join(" ").replace(/\s+/g, " ").trim();
-    if (!parsedTitle) return `${category} ${type === "income" ? "Income" : "Expense"}`;
-
-    return parsedTitle;
-}
-
-/* ================================
-   MAIN ADVANCED NLP ENTRYPOINT
-================================ */
-
-export function tryParseTransaction(prompt: string) {
-    if (!prompt || !prompt.trim()) return null;
-
-    // Crucial: Extract numerical data using original prompt to preserve structural integrity
-    const { amount, clearedText } = extractAmountAndContext(prompt);
-    if (amount === null || isNaN(amount) || amount <= 0) return null;
-
-    // Run downstream logical extraction passes
-    const type = detectType(prompt);
-    const category = detectCategory(prompt);
-    const paymentMethod = detectPaymentMethod(prompt);
-    const date = extractDate(prompt);
-
-    // Title extraction now preserves raw user-written capitalization states
-    const title = extractTitle(clearedText, prompt, category, type);
-
-    const description = `${type.toUpperCase()} transaction of ₹${amount.toFixed(2)} under ${category} via ${paymentMethod}`;
-
-    return {
-        id: 0,
-        title,
-        category,
-        amount,
-        type,
-        date: date.toISOString(),
-        paymentMethod,
-        description,
-    };
+  return {
+    id: 0,
+    title: reconstructedTitle.trim(),
+    amount: resolvedAmount,
+    category: finalCategory,
+    type: finalType,
+    paymentMethod: finalPaymentMethod,
+    date: dateObj.toISOString(),
+    description: `${finalType.toUpperCase()} transaction of ₹${resolvedAmount.toFixed(2)} under ${finalCategory} via ${finalPaymentMethod}.`
+  };
 }
