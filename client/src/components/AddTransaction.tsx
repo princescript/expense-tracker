@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { X, Sparkles } from "lucide-react";
-import { TRANSACTION_CATEGORIES, type PaymentMethod, type TransactionCategory } from "../mocks/transactions";
+import { TRANSACTION_CATEGORIES, type PaymentMethod, type Transaction, type TransactionCategory } from "../mocks/transactions";
 import { toast } from "sonner";
 import { askGemini } from "../services/geminiService";
 import { buildTransactionPrompt } from "../utils/aiHelpers";
 import { addTransaction } from "../services/addTransactionService";
+import { parseTransactionHybrid } from "../utils/modelAI";
 
 interface AddTransactionProps {
     open: boolean;
@@ -54,31 +55,93 @@ export default function AddTransaction({ open, onClose }: AddTransactionProps) {
             toast.error("Something went wrong.");
         }
     };
+  const handleGenerate = async () => {
+    if (!prompt.trim()) return;
 
-    const handleGenerate = async () => {
-        if (!prompt.trim()) return;
-        setLoading(true);
-        try {
-            const data = await askGemini(buildTransactionPrompt(prompt));
-            if (!data) {
-                toast.error("Empty AI response");
-                return;
-            }
-            console.log("AI", data)
-            data.id = 0;
-            addTransaction(data);
+    setLoading(true);
+
+    try {
+        const parsed = parseTransactionHybrid(prompt);
+
+        // -------------------------------
+        // 1. FAST PATH (NO AI)
+        // -------------------------------
+        if (Object.keys(parsed).length > 0) {
+            const tx = parsed as Transaction;
+
+            const safeTx: Transaction = {
+                ...tx,
+                id: Date.now(), // FIX: prevent duplicate keys
+            };
+
+            console.log("PIPELINE (NO AI USED)", safeTx);
+
+            addTransaction(safeTx);
             onClose();
-            toast.success("Transaction added successfully.");
-            // reset
+
+            toast.success("Transaction added successfully (fast mode).");
+
             setAmount("");
             setTitle("");
-        } catch (error) {
-            console.error(error);
-            toast.error("Could not parse AI response. Please try again.");
-        } finally {
-            setLoading(false);
+            return;
         }
-    };
+
+        // -------------------------------
+        // 2. AI FALLBACK
+        // -------------------------------
+        const data = await askGemini(buildTransactionPrompt(prompt));
+
+        if (!data) {
+            toast.error("Empty AI response");
+            return;
+        }
+
+        const aiTx: Transaction = {
+            ...data,
+            id: Date.now(), // FIX: unique ID
+        };
+
+        console.log("AI PIPELINE", aiTx);
+
+        addTransaction(aiTx);
+        onClose();
+
+        toast.success("Transaction added successfully (AI mode).");
+
+        setAmount("");
+        setTitle("");
+    } catch (error) {
+        console.error(error);
+        toast.error("Could not parse transaction. Please try again.");
+    } finally {
+        setLoading(false);
+    }
+};
+
+    // const handleGenerate = async () => {
+    //     if (!prompt.trim()) return;
+    //     setLoading(true);
+    //     try {
+    //         const data = await askGemini(buildTransactionPrompt(prompt));
+    //         if (!data) {
+    //             toast.error("Empty AI response");
+    //             return;
+    //         }
+    //         console.log("AI", data)
+    //         data.id = 0;
+    //         addTransaction(data);
+    //         onClose();
+    //         toast.success("Transaction added successfully.");
+    //         // reset
+    //         setAmount("");
+    //         setTitle("");
+    //     } catch (error) {
+    //         console.error(error);
+    //         toast.error("Could not parse AI response. Please try again.");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
