@@ -2,7 +2,7 @@ import { Plus, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { useGreetingDate } from "../hooks/useGreetingDate";
 import StatCard from "../components/ui/StatCard";
 
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState } from "react";
 
 const ExpenseDonutChart = lazy(() =>
   import("../components/charts/ExpenseDonutChart")
@@ -18,6 +18,7 @@ import {
   transactions,
   type Transaction,
 } from "../mocks/transactions";
+import AddTransaction from "../components/AddTransaction";
 
 /* =========================
    DATA ENGINE (ONLY FIX)
@@ -38,10 +39,9 @@ const getSummary = (transactions: Transaction[]) => {
 
 const Dashboard = () => {
   const { greeting, date } = useGreetingDate();
-
   const { income, expense } = getSummary(transactions);
   const savings = income - expense;
-
+  const [open, setOpen] = useState(false);
   return (
     <div className="min-h-screen bg-[rgb(var(--bg))] text-[rgb(var(--text))]">
       <div className="space-y-6">
@@ -61,12 +61,13 @@ const Dashboard = () => {
             </p>
           </div>
 
-          <button className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-white bg-[rgb(var(--primary))] hover:opacity-90 transition">
+          <button onClick={() => setOpen(true)}
+            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-white bg-[rgb(var(--primary))] hover:opacity-90 transition">
             <Plus size={16} />
             ADD Expense
           </button>
         </header>
-
+        <AddTransaction open={open} onClose={() => setOpen(false)} />
         {/* CARDS (NOW DYNAMIC) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 

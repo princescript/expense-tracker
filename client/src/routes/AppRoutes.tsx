@@ -3,12 +3,14 @@ import { lazy, Suspense } from "react";
 import AppLayout from "../layouts/AppLayout";
 import NotFound from "../pages/NotFound";
 import DashboardSkeleton from "../components/ui/DashboardSkeleton";
-
+const AiDemo = lazy(() => import("../pages/AiDemo"));
 const Analytics = lazy(() => import("../pages/Analytics"));
 const Dashboard = lazy(() => import("../pages/Dashboard"));
 const Transaction = lazy(() => import("../pages/Transaction"));
 const Setting = lazy(() => import("../pages/Settings"));
 const Calendar = lazy(() => import("../pages/Calendar"));
+const Wallet = lazy(() => import("../pages/Wallet"));
+
 
 
 const withSuspense = (Component: React.LazyExoticComponent<any>) => (
@@ -40,10 +42,18 @@ export const router = createBrowserRouter([
         path: "/calendar",
         element: withSuspense(Calendar),
       },
+       {
+        path: "/wallets",
+        element: withSuspense(Wallet),
+      },
       {
         path: "/settings",
         element: withSuspense(Setting),
       },
+     {
+  path: "/aidemo",
+  element: withSuspense(AiDemo),
+}
     ],
   },
   {

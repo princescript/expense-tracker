@@ -30,9 +30,9 @@ const Transaction = () => {
             </p>
           </div>
 
-          <button className="flex items-center gap-2 rounded-lg bg-[rgb(var(--primary))] px-3.5 py-2 text-xs font-medium text-white transition hover:opacity-90">
-            <Plus className="h-4 w-4" />
-            Add New
+          <button className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-white bg-[rgb(var(--primary))] hover:opacity-90 transition">
+            <Plus size={16} />
+            ADD New
           </button>
         </div>
 
@@ -78,8 +78,8 @@ const Transaction = () => {
                 <button
                   key={item}
                   className={`relative pb-2.5 text-xs font-medium whitespace-nowrap ${index === 0
-                      ? "text-[rgb(var(--text))]"
-                      : "text-[rgb(var(--muted))] hover:text-[rgb(var(--text))]"
+                    ? "text-[rgb(var(--text))]"
+                    : "text-[rgb(var(--muted))] hover:text-[rgb(var(--text))]"
                     }`}
                 >
                   {item}

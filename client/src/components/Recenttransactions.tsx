@@ -108,8 +108,7 @@ export default function RecentTransactions({
               key={tx.id}
               onClick={() => toggleHighlight(tx.id)}
               className={`relative flex cursor-pointer items-center justify-between rounded-xl px-4 py-3 transition
-                hover:bg-[rgb(var(--card))] ${
-                  isHighlighted ? "bg-yellow-500/5" : ""
+                hover:bg-[rgb(var(--card))] ${isHighlighted ? "bg-yellow-500/5" : ""
                 }`}
             >
 
@@ -135,27 +134,24 @@ export default function RecentTransactions({
                   </p>
                 </div>
               </div>
-
               {/* RIGHT SIDE */}
               <div className="flex items-center gap-3">
-
+                {/* AMOUNT (SAFE DISPLAY ONLY) */}
                 <span
-                  className={`text-sm font-semibold ${
-                    isIncome
-                      ? "text-[rgb(var(--success))]"
-                      : "text-[rgb(var(--danger))]"
-                  }`}
+                  className={`px-4 py-3 text-left text-sm font-semibold ${isIncome
+                    ? "text-[rgb(var(--success))]"
+                    : "text-[rgb(var(--danger))]"
+                    }`}
                 >
-                  {tx.amount.toLocaleString("en-IN")}
+                  {isIncome ? "+" : "-"}₹
+                  {Number(tx.amount).toLocaleString("en-IN")}
                 </span>
-
                 {star && (
                   <button
-                    className={`p-1.5 transition ${
-                      isHighlighted
+                    className={`p-1.5 transition ${isHighlighted
                         ? "text-yellow-400"
                         : "text-[rgb(var(--muted))] hover:text-[rgb(var(--text))]"
-                    }`}
+                      }`}
                   >
                     <Star
                       className="h-4 w-4"
