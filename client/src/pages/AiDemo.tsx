@@ -4,7 +4,7 @@ import type {
   TransactionCategory,
   PaymentMethod,
 } from "../mocks/transactions";
-import { parseTransactionHybrid } from "../utils/modelAI";
+import { parseTransactionProduction } from "../utils/modelAI";
 
 /* ================================
    TYPE
@@ -45,44 +45,52 @@ export default function AiDemo() {
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const handleParseAll = () => {
-    if (!input.trim()) return;
+ const handleParseAll = () => {
+  if (!input.trim()) return;
 
-    setLoading(true);
-    setResults([]);
-    setErrors([]);
-    setJsonOutput("");
+  setLoading(true);
+  setResults([]);
+  setErrors([]);
+  setJsonOutput("");
 
-    try {
-      const lines = input.split("\n").filter(Boolean);
+  try {
+    const lines = input
+      .split("\n")
+      .map((x) => x.trim())
+      .filter(Boolean);
 
-      const parsed: ParsedTransaction[] = [];
-      const failed: string[] = [];
+    const parsed: ParsedTransaction[] = [];
+    const failed: string[] = [];
 
-      lines.forEach((line, index) => {
-        const result = parseTransactionHybrid(line);
+    lines.forEach((line, index) => {
+      const result = parseTransactionProduction(line);
 
-        if (isValidTransaction(result)) {
-          parsed.push(result);
-        } else {
-          failed.push(`Line ${index + 1}: ${line}`);
-        }
-      });
+      if (
+        result &&
+        result.transaction &&
+        !result.needsLLM &&
+        isValidTransaction(result.transaction)
+      ) {
+        parsed.push(result.transaction);
+      } else {
+        failed.push(
+          `Line ${index + 1}: ${line}${
+            result ? ` (confidence: ${result.confidence})` : ""
+          }`
+        );
+      }
+    });
 
-      setResults(parsed);
-
-      // 🔥 CLEAN JSON EXPORT
-      const json = JSON.stringify(parsed, null, 2);
-      setJsonOutput(json);
-
-      setErrors(failed);
-    } catch (e) {
-      console.error(e);
-      setErrors(["Unexpected parsing error"]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setResults(parsed);
+    setJsonOutput(JSON.stringify(parsed, null, 2));
+    setErrors(failed);
+  } catch (err) {
+    console.error(err);
+    setErrors(["Unexpected parsing error"]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const copyJSON = () => {
     navigator.clipboard.writeText(jsonOutput);
