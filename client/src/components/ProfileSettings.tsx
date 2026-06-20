@@ -18,8 +18,7 @@ const ProfileSettings = () => {
   }, []);
 
   return (
-    <div className="rounded-xl  p-4 border border-[rgb(var(--border))]">
-      <div className="space-y-8 ">
+      <div className="space-y-8">
         {/* Header */}
         <div>
           <h2 className="text-xl font-semibold text-[rgb(var(--text))]">
@@ -178,8 +177,6 @@ const ProfileSettings = () => {
           </button>
         </div>
       </div>
-    </div>
-
   );
 };
 
