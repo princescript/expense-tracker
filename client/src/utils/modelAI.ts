@@ -15,7 +15,6 @@ export interface Transaction {
 const INCOME_SIGNALS: Record<string, number> = { salary: 5, payroll: 5, stipend: 4, wages: 3, bonus: 4, received: 3, credited: 5, income: 3, refund: 5, refunded: 5, cashback: 4, payout: 4, earned: 4 };
 const EXPENSE_SIGNALS: Record<string, number> = { paid: 3, pay: 1, spent: 3, bought: 3, purchased: 4, debited: 5, withdrew: 3, billed: 2, sent: 2 };
 
-// Entity mapping forces semantic grouping and structural semantic anchors
 interface EntityDefinition {
   canonicalName: string;
   category: string;
@@ -45,7 +44,12 @@ const CATEGORY_MAP: Record<string, { cat: string; weight: number }> = {
   bus: { cat: "Transport", weight: 3 }, train: { cat: "Transport", weight: 3 }, metro: { cat: "Transport", weight: 3 }, fuel: { cat: "Transport", weight: 3 }, petrol: { cat: "Transport", weight: 3 }, cab: { cat: "Transport", weight: 2 }, taxi: { cat: "Transport", weight: 2 }, flight: { cat: "Transport", weight: 4 },
   rent: { cat: "Bills", weight: 5 }, electricity: { cat: "Bills", weight: 5 }, water: { cat: "Bills", weight: 4 }, internet: { cat: "Bills", weight: 4 }, wifi: { cat: "Bills", weight: 3 }, bill: { cat: "Bills", weight: 2 }, recharge: { cat: "Bills", weight: 3 }, emi: { cat: "Bills", weight: 5 }, insurance: { cat: "Bills", weight: 4 },
   mall: { cat: "Shopping", weight: 2 }, clothes: { cat: "Shopping", weight: 3 }, shirt: { cat: "Shopping", weight: 3 }, shoes: { cat: "Shopping", weight: 3 }, shopping: { cat: "Shopping", weight: 2 },
-  stocks: { cat: "Investment", weight: 5 }, stock: { cat: "Investment", weight: 4 }, mutual: { cat: "Investment", weight: 5 }, fund: { cat: "Investment", weight: 3 }, sip: { cat: "Investment", weight: 5 }, crypto: { cat: "Investment", weight: 5 }, shares: { cat: "Investment", weight: 4 }
+  stocks: { cat: "Investment", weight: 5 }, stock: { cat: "Investment", weight: 4 }, mutual: { cat: "Investment", weight: 5 }, fund: { cat: "Investment", weight: 3 }, sip: { cat: "Investment", weight: 5 }, crypto: { cat: "Investment", weight: 5 }, shares: { cat: "Investment", weight: 4 },
+  // FIX FIXES HERE: Added key contextual anchors preventing "Others" leakage for multi-word intents
+  cinema: { cat: "Entertainment", weight: 4 }, movie: { cat: "Entertainment", weight: 4 }, ticket: { cat: "Entertainment", weight: 3 }, tickets: { cat: "Entertainment", weight: 3 },
+  freelance: { cat: "Freelance", weight: 5 }, client: { cat: "Freelance", weight: 4 }, payment: { cat: "Others", weight: 0 },
+  reward: { cat: "Salary", weight: 4 }, performance: { cat: "Salary", weight: 3 },
+  stall: { cat: "Food & Drinks", weight: 2 }, snacks: { cat: "Food & Drinks", weight: 3 }, tea: { cat: "Food & Drinks", weight: 3 }
 };
 
 const PAYMENT_MAP: Record<string, { method: string; weight: number }> = {
@@ -55,12 +59,13 @@ const PAYMENT_MAP: Record<string, { method: string; weight: number }> = {
   cash: { method: "Cash", weight: 5 }
 };
 
-// Expanded aggressive real-world stopword telemetry array
+// FIX FIXES HERE: Expanded systemic noise words to include procedural actions & conversational debris
 const SYSTEMIC_STOPWORDS = new Set([
   "for", "of", "to", "from", "on", "via", "by", "the", "a", "an", "and", "at", "in", "with", "using", 
   "amount", "today", "yesterday", "rs", "inr", "rupees", "bucks", "towards", "took", "take", "got", 
   "get", "gave", "give", "ordered", "order", "bought", "buy", "as", "is", "this", "month", "had", 
-  "around", "hours", "near", "station", "there", "some", "someone", "friends", "colleagues", "me", "my"
+  "around", "hours", "near", "station", "there", "some", "someone", "friends", "colleagues", "me", "my",
+  "went", "payment", "website", "local", "stall", "company"
 ]);
 
 /* ========================================================================
@@ -73,9 +78,9 @@ function isBadTitle(title: string): boolean {
   const words = normalized.split(/\s+/);
   
   return (
-    words.length < 2 || // Rejects single word fragments like "After"
-    words.every(w => w.length <= 2) || // Rejects garbage syntax fragments like "d x near"
-    /^(after|before|had|paid|spent|received|credited|refund|for|around|hours|station)$/i.test(normalized)
+    words.length < 2 || 
+    words.every(w => w.length <= 2) || 
+    /^(after|before|had|paid|spent|received|credited|refund|for|around|hours|station|payment|salary)$/i.test(normalized)
   );
 }
 
@@ -87,7 +92,8 @@ function generateSemanticFallback(category: string, type: string): string {
     "Shopping": "Shopping Expense",
     "Investment": "Investment Transaction",
     "Entertainment": "Entertainment Spend",
-    "Salary": "Salary Payout"
+    "Salary": "Salary Payout",
+    "Freelance": "Freelance Income" // FIX: Added missing domain fallback mapping configurations
   };
   return map[category] ?? `${category} ${type === "income" ? "Income" : "Expense"}`;
 }
@@ -98,11 +104,9 @@ function generateSemanticFallback(category: string, type: string): string {
 export function parseTransactionHybrid(input: string): Transaction | Record<string, never> {
   if (!input || !input.trim()) return {};
 
-  // Clean raw symbols to defend against token fracture
   const normalized = input.replace(/[₹$€]/g, " $& ").trim();
   const tokens = normalized.split(/\s+/);
 
-  // --- PHASE 1: SINGLE PASS LINEAR TOKEN SCAN ---
   const numericCandidates: { value: number; index: number; hasIndicator: boolean }[] = [];
   let incomeScore = 0;
   let expenseScore = 0;
@@ -110,7 +114,6 @@ export function parseTransactionHybrid(input: string): Transaction | Record<stri
   const categoryScores: Record<string, number> = {};
   const paymentScores: Record<string, number> = {};
   
-  // Track targeted structures captured inline
   const capturedEntities: EntityDefinition[] = [];
   const validNouns: string[] = [];
 
@@ -143,7 +146,7 @@ export function parseTransactionHybrid(input: string): Transaction | Record<stri
     if (ENTITY_HINTS[cleanLower]) {
       const entity = ENTITY_HINTS[cleanLower];
       capturedEntities.push(entity);
-      categoryScores[entity.category] = (categoryScores[entity.category] || 0) + 5; // Absolute Priority Weight Boost
+      categoryScores[entity.category] = (categoryScores[entity.category] || 0) + 5; 
     }
 
     // 3. System Linguistic Rule Mapping
@@ -152,7 +155,10 @@ export function parseTransactionHybrid(input: string): Transaction | Record<stri
 
     if (CATEGORY_MAP[cleanLower]) {
       const entry = CATEGORY_MAP[cleanLower];
-      categoryScores[entry.cat] = (categoryScores[entry.cat] || 0) + entry.weight;
+      // FIX FIXES HERE: Safeguard from functional tokens zeroing out priority fields
+      if (entry.weight > 0) {
+        categoryScores[entry.cat] = (categoryScores[entry.cat] || 0) + entry.weight;
+      }
     }
 
     if (PAYMENT_MAP[cleanLower]) {
@@ -178,7 +184,6 @@ export function parseTransactionHybrid(input: string): Transaction | Record<stri
     if (!isSystemicNoise) {
       const preservedNoun = rawToken.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, "");
       if (preservedNoun.length > 1) {
-        // Enforce clean formatting matching structural patterns
         const capitalized = preservedNoun.charAt(0).toUpperCase() + preservedNoun.slice(1).toLowerCase();
         if (!validNouns.includes(capitalized)) {
           validNouns.push(capitalized);
@@ -189,7 +194,6 @@ export function parseTransactionHybrid(input: string): Transaction | Record<stri
 
   // --- PHASE 2: DETACHED INTENT POST-PROCESSING ---
 
-  // CRITICAL FAIL-SAFE 1: Amount Validation
   if (numericCandidates.length === 0) return {};
   const resolvedAmount = numericCandidates.sort((a, b) => {
     if (a.hasIndicator !== b.hasIndicator) return a.hasIndicator ? -1 : 1;
@@ -198,10 +202,8 @@ export function parseTransactionHybrid(input: string): Transaction | Record<stri
   
   if (resolvedAmount <= 0) return {};
 
-  // Resolve Primary Action Intent
   const finalType: "income" | "expense" = (incomeScore >= expenseScore && incomeScore > 0) ? "income" : "expense";
 
-  // Resolve Category Matrix
   let finalCategory = "Others";
   let maxCatScore = 0;
   for (const [cat, score] of Object.entries(categoryScores)) {
@@ -211,7 +213,6 @@ export function parseTransactionHybrid(input: string): Transaction | Record<stri
     }
   }
 
-  // Resolve Payment Infrastructure Map
   let finalPaymentMethod = "UPI";
   let maxPayScore = 0;
   for (const [method, score] of Object.entries(paymentScores)) {
@@ -221,7 +222,6 @@ export function parseTransactionHybrid(input: string): Transaction | Record<stri
     }
   }
 
-  // Finalize Date Calculations
   const dateObj = new Date();
   if (dateOffsetDays !== null) {
     dateObj.setDate(dateObj.getDate() - dateOffsetDays);
@@ -230,11 +230,9 @@ export function parseTransactionHybrid(input: string): Transaction | Record<stri
   // --- PHASE 3: HIGHER-ORDER INTENT TITLE RECONSTRUCTION ---
   let reconstructedTitle = "";
 
-  // Strategy A: Anchor Generation via Entity Mapping
   if (capturedEntities.length > 0) {
     const primaryEntity = capturedEntities[0];
     
-    // Check if the user passed explicit intent descriptors alongside the entity (e.g., "Burger")
     const contextualModifier = validNouns.find(noun => 
       noun.toLowerCase() !== primaryEntity.canonicalName.toLowerCase() &&
       CATEGORY_MAP[noun.toLowerCase()]?.cat === primaryEntity.category
@@ -243,25 +241,20 @@ export function parseTransactionHybrid(input: string): Transaction | Record<stri
     if (contextualModifier) {
       reconstructedTitle = `${primaryEntity.canonicalName} ${contextualModifier}`;
     } else {
-      // Intent mapping check (e.g., "Refund" mapping outscales normal flow)
       const isRefundIntent = tokens.some(t => /refund/i.test(t));
       const actionLabel = isRefundIntent ? "Refund" : primaryEntity.defaultAction;
       reconstructedTitle = `${primaryEntity.canonicalName} ${actionLabel}`;
     }
   } else {
-    // Strategy B: Filtered Meaningful Noun Reconstruction
     reconstructedTitle = validNouns.slice(0, 4).join(" ");
   }
 
-  // Strategy C: Structural Heuristic Gate Check
   if (isBadTitle(reconstructedTitle)) {
     reconstructedTitle = generateSemanticFallback(finalCategory, finalType);
   }
 
-  // CRITICAL FAIL-SAFE 2: Outbound Confidence Verification
-  // If we ended up with no categorical mapping and structural title reconstruction failed completely
   if (finalCategory === "Others" && isBadTitle(reconstructedTitle)) {
-    return {}; // Terminate to execute fallback trigger to processing LLM layer
+    return {}; 
   }
 
   return {
