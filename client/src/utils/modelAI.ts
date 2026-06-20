@@ -11,8 +11,9 @@ export interface Transaction {
 
 /* ========================================================================
    1. DICTIONARIES, ENTITIES, AND STRUCTURAL DICTIONARY MAPS
-   ======================================================================== */
-const INCOME_SIGNALS: Record<string, number> = { salary: 5, payroll: 5, stipend: 4, wages: 3, bonus: 4, received: 3, credited: 5, income: 3, refund: 5, refunded: 5, cashback: 4, payout: 4, earned: 4 };
+   ======================================================================= */
+// CRITICAL FIX: Boosted cashback/refund weights to match prime income anchors
+const INCOME_SIGNALS: Record<string, number> = { salary: 5, payroll: 5, stipend: 4, wages: 3, bonus: 5, received: 3, credited: 5, income: 3, refund: 5, refunded: 5, cashback: 5, payout: 4, earned: 4 };
 const EXPENSE_SIGNALS: Record<string, number> = { paid: 3, pay: 1, spent: 3, bought: 3, purchased: 4, debited: 5, withdrew: 3, billed: 2, sent: 2 };
 
 interface EntityDefinition {
@@ -45,7 +46,6 @@ const CATEGORY_MAP: Record<string, { cat: string; weight: number }> = {
   rent: { cat: "Bills", weight: 5 }, electricity: { cat: "Bills", weight: 5 }, water: { cat: "Bills", weight: 4 }, internet: { cat: "Bills", weight: 4 }, wifi: { cat: "Bills", weight: 3 }, bill: { cat: "Bills", weight: 2 }, recharge: { cat: "Bills", weight: 3 }, emi: { cat: "Bills", weight: 5 }, insurance: { cat: "Bills", weight: 4 },
   mall: { cat: "Shopping", weight: 2 }, clothes: { cat: "Shopping", weight: 3 }, shirt: { cat: "Shopping", weight: 3 }, shoes: { cat: "Shopping", weight: 3 }, shopping: { cat: "Shopping", weight: 2 },
   stocks: { cat: "Investment", weight: 5 }, stock: { cat: "Investment", weight: 4 }, mutual: { cat: "Investment", weight: 5 }, fund: { cat: "Investment", weight: 3 }, sip: { cat: "Investment", weight: 5 }, crypto: { cat: "Investment", weight: 5 }, shares: { cat: "Investment", weight: 4 },
-  // FIX FIXES HERE: Added key contextual anchors preventing "Others" leakage for multi-word intents
   cinema: { cat: "Entertainment", weight: 4 }, movie: { cat: "Entertainment", weight: 4 }, ticket: { cat: "Entertainment", weight: 3 }, tickets: { cat: "Entertainment", weight: 3 },
   freelance: { cat: "Freelance", weight: 5 }, client: { cat: "Freelance", weight: 4 }, payment: { cat: "Others", weight: 0 },
   reward: { cat: "Salary", weight: 4 }, performance: { cat: "Salary", weight: 3 },
@@ -56,16 +56,17 @@ const PAYMENT_MAP: Record<string, { method: string; weight: number }> = {
   upi: { method: "UPI", weight: 3 }, gpay: { method: "UPI", weight: 4 }, phonepe: { method: "UPI", weight: 4 }, paytm: { method: "UPI", weight: 4 }, bhim: { method: "UPI", weight: 4 }, cred: { method: "UPI", weight: 4 },
   credit: { method: "Card", weight: 4 }, debit: { method: "Card", weight: 4 }, card: { method: "Card", weight: 2 }, visa: { method: "Card", weight: 3 }, mastercard: { method: "Card", weight: 3 }, amex: { method: "Card", weight: 5 },
   neft: { method: "Bank Transfer", weight: 5 }, imps: { method: "Bank Transfer", weight: 5 }, rtgs: { method: "Bank Transfer", weight: 5 }, bank: { method: "Bank Transfer", weight: 1 }, transfer: { method: "Bank Transfer", weight: 2 }, netbanking: { method: "Bank Transfer", weight: 3 },
+  paypal: { method: "Bank Transfer", weight: 5 }, // CRITICAL FIX: Explicit route matching for cross-border gateways
   cash: { method: "Cash", weight: 5 }
 };
 
-// FIX FIXES HERE: Expanded systemic noise words to include procedural actions & conversational debris
+// CRITICAL FIX: Cleaned trailing transactional noise ("popcorn", "friends") out of system loops
 const SYSTEMIC_STOPWORDS = new Set([
   "for", "of", "to", "from", "on", "via", "by", "the", "a", "an", "and", "at", "in", "with", "using", 
   "amount", "today", "yesterday", "rs", "inr", "rupees", "bucks", "towards", "took", "take", "got", 
   "get", "gave", "give", "ordered", "order", "bought", "buy", "as", "is", "this", "month", "had", 
   "around", "hours", "near", "station", "there", "some", "someone", "friends", "colleagues", "me", "my",
-  "went", "payment", "website", "local", "stall", "company"
+  "went", "payment", "website", "local", "stall", "company", "popcorn", "extras", "side", "sides"
 ]);
 
 /* ========================================================================
@@ -93,7 +94,7 @@ function generateSemanticFallback(category: string, type: string): string {
     "Investment": "Investment Transaction",
     "Entertainment": "Entertainment Spend",
     "Salary": "Salary Payout",
-    "Freelance": "Freelance Income" // FIX: Added missing domain fallback mapping configurations
+    "Freelance": "Freelance Income"
   };
   return map[category] ?? `${category} ${type === "income" ? "Income" : "Expense"}`;
 }
@@ -118,6 +119,7 @@ export function parseTransactionHybrid(input: string): Transaction | Record<stri
   const validNouns: string[] = [];
 
   let dateOffsetDays: number | null = null;
+  let hasWalletSignature = false;
 
   for (let i = 0; i < tokens.length; i++) {
     const rawToken = tokens[i];
@@ -155,7 +157,6 @@ export function parseTransactionHybrid(input: string): Transaction | Record<stri
 
     if (CATEGORY_MAP[cleanLower]) {
       const entry = CATEGORY_MAP[cleanLower];
-      // FIX FIXES HERE: Safeguard from functional tokens zeroing out priority fields
       if (entry.weight > 0) {
         categoryScores[entry.cat] = (categoryScores[entry.cat] || 0) + entry.weight;
       }
@@ -164,6 +165,11 @@ export function parseTransactionHybrid(input: string): Transaction | Record<stri
     if (PAYMENT_MAP[cleanLower]) {
       const entry = PAYMENT_MAP[cleanLower];
       paymentScores[entry.method] = (paymentScores[entry.method] || 0) + entry.weight;
+    }
+
+    // Capture generic wallet intent hints
+    if (["wallet", "cashapp", "venmo", "stripe", "pay"].includes(cleanLower)) {
+      hasWalletSignature = true;
     }
 
     // 4. Temporal Chronology Tracking
@@ -213,13 +219,18 @@ export function parseTransactionHybrid(input: string): Transaction | Record<stri
     }
   }
 
-  let finalPaymentMethod = "UPI";
+  // CRITICAL FIX: Safe routing fallback matrix logic
+  let finalPaymentMethod = "UPI"; 
   let maxPayScore = 0;
   for (const [method, score] of Object.entries(paymentScores)) {
     if (score > maxPayScore) {
       maxPayScore = score;
       finalPaymentMethod = method;
     }
+  }
+  // If no explicit keyword matches but signature hints pointing to wallet are caught
+  if (maxPayScore === 0 && hasWalletSignature) {
+    finalPaymentMethod = "Bank Transfer"; 
   }
 
   const dateObj = new Date();
@@ -241,8 +252,14 @@ export function parseTransactionHybrid(input: string): Transaction | Record<stri
     if (contextualModifier) {
       reconstructedTitle = `${primaryEntity.canonicalName} ${contextualModifier}`;
     } else {
-      const isRefundIntent = tokens.some(t => /refund/i.test(t));
-      const actionLabel = isRefundIntent ? "Refund" : primaryEntity.defaultAction;
+      // Intent balancing logic
+      const hasRefundToken = tokens.some(t => /refund/i.test(t));
+      const hasCashbackToken = tokens.some(t => /cashback/i.test(t));
+      
+      let actionLabel = primaryEntity.defaultAction;
+      if (hasRefundToken) actionLabel = "Refund";
+      else if (hasCashbackToken) actionLabel = "Cashback";
+
       reconstructedTitle = `${primaryEntity.canonicalName} ${actionLabel}`;
     }
   } else {
