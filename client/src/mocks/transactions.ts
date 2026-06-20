@@ -2,10 +2,35 @@ import { transactionUIConfig } from "../utils/transactionUIConfig";
 export type TransactionType = "income" | "expense";
 export type PaymentMethod = "UPI" | "Cash" | "Card" | "Bank Transfer";
 
+export type TransactionCategory =
+  | "Bills"
+  | "Salary"
+  | "Freelance"
+  | "Transport"
+  | "Investment"
+  | "Education"
+  | "Entertainment"
+  | "Food & Drinks"
+  | "Shopping"
+  | "Others";
+
+export const TRANSACTION_CATEGORIES = [
+  "Bills",
+  "Salary",
+  "Freelance",
+  "Transport",
+  "Investment",
+  "Education",
+  "Entertainment",
+  "Food & Drinks",
+  "Shopping",
+  "Others",
+] as const;
+
 export interface Transaction {
   id: number;
   title: string;
-  category: string;
+  category: TransactionCategory;
   amount: number;
   type: TransactionType;
   date: string;

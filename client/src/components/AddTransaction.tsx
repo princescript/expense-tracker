@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { X, Sparkles } from "lucide-react";
-import type { PaymentMethod } from "../mocks/transactions";
+import { TRANSACTION_CATEGORIES, type PaymentMethod, type TransactionCategory } from "../mocks/transactions";
 import { toast } from "sonner";
 import { askGemini } from "../services/geminiService";
 import { buildTransactionPrompt } from "../utils/aiHelpers";
@@ -37,13 +37,12 @@ export default function AddTransaction({ open, onClose }: AddTransactionProps) {
         }
         const payload = {
             title,
-            category,
+            category: category as TransactionCategory,
             amount: Number(amount),
             type,
             date,
             paymentMethod
         };
-
         try {
             addTransaction(payload);
             onClose();
@@ -56,7 +55,6 @@ export default function AddTransaction({ open, onClose }: AddTransactionProps) {
         }
     };
 
-
     const handleGenerate = async () => {
         if (!prompt.trim()) return;
         setLoading(true);
@@ -66,7 +64,7 @@ export default function AddTransaction({ open, onClose }: AddTransactionProps) {
                 toast.error("Empty AI response");
                 return;
             }
-            console.log("AI" ,data)
+            console.log("AI", data)
             data.id = 0;
             addTransaction(data);
             onClose();
@@ -166,9 +164,11 @@ export default function AddTransaction({ open, onClose }: AddTransactionProps) {
                                     onChange={(e) => setCategory(e.target.value)}
                                     className={baseInput}
                                 >
-                                    <option>Food & Drinks</option>
-                                    <option>Shopping</option>
-                                    <option>Transport</option>
+                                    {TRANSACTION_CATEGORIES.map((cat) => (
+                                        <option key={cat} value={cat}>
+                                            {cat}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                             <div>
