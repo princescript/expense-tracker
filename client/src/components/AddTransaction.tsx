@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { askGemini } from "../services/geminiService";
 import { buildTransactionPrompt } from "../utils/aiHelpers";
 import { addTransaction } from "../services/addTransactionService";
+import { parseTransactionSync } from "../utils/modelAI";
 
 interface AddTransactionProps {
     open: boolean;
@@ -56,13 +57,9 @@ export default function AddTransaction({ open, onClose }: AddTransactionProps) {
     };
     const handleGenerate = async () => {
         if (!prompt.trim()) return;
-
         setLoading(true);
-
         try {
-            const parsed  = {}
-            //const parsed = inferTransactionFintechGrade(prompt);
-
+            const parsed = parseTransactionSync(prompt);
             // -------------------------------
             // 1. FAST PATH (NO AI)
             // -------------------------------
