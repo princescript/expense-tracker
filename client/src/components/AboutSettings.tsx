@@ -24,8 +24,7 @@ const AboutSettings = () => {
   ];
 
   return (
-    <div className="space-y-10">
-
+    <div className="space-y-8">
       {/* Header */}
       <div>
         <div className="flex items-center gap-4">

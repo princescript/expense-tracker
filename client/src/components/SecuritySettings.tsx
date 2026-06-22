@@ -2,7 +2,7 @@ import { Lock, ShieldCheck } from "lucide-react";
 
 const SecuritySettings = () => {
   return (
-    <div className="space-y-5">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
