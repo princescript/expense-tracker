@@ -4,7 +4,7 @@ import type {
   TransactionCategory,
   PaymentMethod,
 } from "../mocks/transactions";
-import { parseTransactionProduction } from "../utils/modelAI";
+import {  parseTransactionSync } from "../utils/modelAI";
 
 /* ================================
    TYPE
@@ -45,7 +45,7 @@ export default function AiDemo() {
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
- const handleParseAll = () => {
+const handleParseAll = () => {
   if (!input.trim()) return;
 
   setLoading(true);
@@ -62,28 +62,19 @@ export default function AiDemo() {
     const parsed: ParsedTransaction[] = [];
     const failed: string[] = [];
 
-    lines.forEach((line, index) => {
-      const result = parseTransactionProduction(line);
+    lines.forEach((line) => {
+      const result = parseTransactionSync(line);
 
-      if (
-        result &&
-        result.transaction &&
-        !result.needsLLM &&
-        isValidTransaction(result.transaction)
-      ) {
-        parsed.push(result.transaction);
+      if (isValidTransaction(result)) {
+        parsed.push(result);
       } else {
-        failed.push(
-          `Line ${index + 1}: ${line}${
-            result ? ` (confidence: ${result.confidence})` : ""
-          }`
-        );
+        failed.push(line);
       }
     });
 
     setResults(parsed);
-    setJsonOutput(JSON.stringify(parsed, null, 2));
     setErrors(failed);
+    setJsonOutput(JSON.stringify(parsed, null, 2));
   } catch (err) {
     console.error(err);
     setErrors(["Unexpected parsing error"]);
@@ -91,7 +82,6 @@ export default function AiDemo() {
     setLoading(false);
   }
 };
-
   const copyJSON = () => {
     navigator.clipboard.writeText(jsonOutput);
   };

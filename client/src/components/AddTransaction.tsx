@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { askGemini } from "../services/geminiService";
 import { buildTransactionPrompt } from "../utils/aiHelpers";
 import { addTransaction } from "../services/addTransactionService";
-import { parseTransactionHybrid } from "../utils/modelAI";
 
 interface AddTransactionProps {
     open: boolean;
@@ -55,68 +54,69 @@ export default function AddTransaction({ open, onClose }: AddTransactionProps) {
             toast.error("Something went wrong.");
         }
     };
-  const handleGenerate = async () => {
-    if (!prompt.trim()) return;
+    const handleGenerate = async () => {
+        if (!prompt.trim()) return;
 
-    setLoading(true);
+        setLoading(true);
 
-    try {
-        const parsed = parseTransactionHybrid(prompt);
+        try {
+            const parsed  = {}
+            //const parsed = inferTransactionFintechGrade(prompt);
 
-        // -------------------------------
-        // 1. FAST PATH (NO AI)
-        // -------------------------------
-        if (Object.keys(parsed).length > 0) {
-            const tx = parsed as Transaction;
+            // -------------------------------
+            // 1. FAST PATH (NO AI)
+            // -------------------------------
+            if (Object.keys(parsed).length > 0) {
+                const tx = parsed as Transaction;
 
-            const safeTx: Transaction = {
-                ...tx,
-                id: Date.now(), // FIX: prevent duplicate keys
+                const safeTx: Transaction = {
+                    ...tx,
+                    id: Date.now(), // FIX: prevent duplicate keys
+                };
+
+                console.log("PIPELINE (NO AI USED)", safeTx);
+
+                addTransaction(safeTx);
+                onClose();
+
+                toast.success("Transaction added successfully (fast mode).");
+
+                setAmount("");
+                setTitle("");
+                return;
+            }
+
+            // -------------------------------
+            // 2. AI FALLBACK
+            // -------------------------------
+            const data = await askGemini(buildTransactionPrompt(prompt));
+
+            if (!data) {
+                toast.error("Empty AI response");
+                return;
+            }
+
+            const aiTx: Transaction = {
+                ...data,
+                id: Date.now(), // FIX: unique ID
             };
 
-            console.log("PIPELINE (NO AI USED)", safeTx);
+            console.log("AI PIPELINE", aiTx);
 
-            addTransaction(safeTx);
+            addTransaction(aiTx);
             onClose();
 
-            toast.success("Transaction added successfully (fast mode).");
+            toast.success("Transaction added successfully (AI mode).");
 
             setAmount("");
             setTitle("");
-            return;
+        } catch (error) {
+            console.error(error);
+            toast.error("Could not parse transaction. Please try again.");
+        } finally {
+            setLoading(false);
         }
-
-        // -------------------------------
-        // 2. AI FALLBACK
-        // -------------------------------
-        const data = await askGemini(buildTransactionPrompt(prompt));
-
-        if (!data) {
-            toast.error("Empty AI response");
-            return;
-        }
-
-        const aiTx: Transaction = {
-            ...data,
-            id: Date.now(), // FIX: unique ID
-        };
-
-        console.log("AI PIPELINE", aiTx);
-
-        addTransaction(aiTx);
-        onClose();
-
-        toast.success("Transaction added successfully (AI mode).");
-
-        setAmount("");
-        setTitle("");
-    } catch (error) {
-        console.error(error);
-        toast.error("Could not parse transaction. Please try again.");
-    } finally {
-        setLoading(false);
-    }
-};
+    };
 
     // const handleGenerate = async () => {
     //     if (!prompt.trim()) return;

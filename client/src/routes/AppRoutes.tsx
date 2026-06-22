@@ -42,7 +42,7 @@ export const router = createBrowserRouter([
         path: "/calendar",
         element: withSuspense(Calendar),
       },
-       {
+      {
         path: "/wallets",
         element: withSuspense(Wallet),
       },
@@ -50,10 +50,10 @@ export const router = createBrowserRouter([
         path: "/settings",
         element: withSuspense(Setting),
       },
-     {
-  path: "/aidemo",
-  element: withSuspense(AiDemo),
-}
+      {
+        path: "/aidemo",
+        element: withSuspense(AiDemo),
+      }
     ],
   },
   {
